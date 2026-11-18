@@ -1,0 +1,17 @@
+{
+  "name": "Dakshin Showdown — The Great Naarkali Fight",
+  "short_name": "Dakshin Showdown",
+  "description": "Pan-South Indian political and pop-culture satire 3D arena fighter.",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#120a06",
+  "theme_color": "#120a06",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

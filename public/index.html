@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#120a06">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="apple-mobile-web-app-title" content="Dakshin Showdown">
+  <title>Dakshin Showdown — Pan-South Satire Fighter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Teko:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/main-BAhoKV_T.css">
+  <style>
+    #local2p-btn.active {
+      background: linear-gradient(180deg, #ffd23f, #e86b00);
+      color: #160902;
+      border-color: #fff3cf;
+      box-shadow: 0 0 18px rgba(255, 195, 64, 0.75);
+    }
+    body.online #local2p-btn { display: none; }
+
+    /* Dakshin Kasavu Gold, Temple Crimson & Peacock Teal visual differentiation */
+    .logo {
+      background: linear-gradient(180deg, #fffdf2 8%, #ffd23f 42%, #d91e36 68%, #ffbe3b 96%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      filter: drop-shadow(5px 5px #2e0712) drop-shadow(0 0 28px rgba(255, 190, 59, 0.55));
+    }
+    #select {
+      background:
+        radial-gradient(circle at 18% 42%, rgba(225, 29, 72, 0.22), transparent 42%),
+        radial-gradient(circle at 82% 42%, rgba(14, 116, 144, 0.24), transparent 42%),
+        linear-gradient(180deg, rgba(16, 5, 16, 0.78) 0%, rgba(10, 6, 20, 0.08) 28%, rgba(10, 6, 20, 0.14) 56%, rgba(12, 4, 14, 0.90) 100%);
+    }
+    #select h1 {
+      letter-spacing: 5px;
+      background: linear-gradient(180deg, #fffdf4 10%, #facc15 55%, #f59e0b 95%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      filter: drop-shadow(3px 3px #2e0712) drop-shadow(0 0 18px rgba(250, 204, 21, 0.4));
+    }
+    #select .controls {
+      top: 72px; bottom: auto;
+      background: rgba(14, 6, 24, 0.78);
+      border: 1px solid rgba(250, 204, 21, 0.35);
+      border-radius: 999px;
+      padding: 4px 16px;
+      white-space: nowrap;
+      z-index: 25;
+      backdrop-filter: blur(8px);
+    }
+    .sel-vs {
+      top: 25%;
+      font-size: clamp(56px, 7.2vw, 98px);
+      background: linear-gradient(180deg, #fffbe0 10%, #facc15 48%, #e11d48 92%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      filter: drop-shadow(4px 4px #2a040d) drop-shadow(0 0 22px rgba(225, 29, 72, 0.65));
+    }
+    #select .sel-center {
+      width: min(740px, 60vw);
+      z-index: 25;
+      pointer-events: auto;
+      gap: 7px;
+      bottom: 22px;
+      padding: 12px 18px 14px;
+      background: linear-gradient(180deg, rgba(20, 8, 28, 0.86), rgba(34, 6, 16, 0.92));
+      border: 1px solid rgba(250, 204, 21, 0.42);
+      border-top: 3px solid #facc15;
+      border-radius: 14px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+    #select .grid {
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 730px;
+      gap: 6px;
+      pointer-events: auto;
+    }
+    #select .tile {
+      width: 64px; height: 74px;
+      transform: none !important;
+      border: 2px solid rgba(250, 204, 21, 0.32);
+      border-radius: 8px;
+      background: radial-gradient(circle at 50% 28%, #361224, #100816);
+      clip-path: polygon(0 0, 86% 0, 100% 14%, 100% 100%, 14% 100%, 0 86%);
+      transition: transform 0.16s cubic-bezier(.2,.8,.3,1), border-color 0.16s, box-shadow 0.16s;
+      pointer-events: auto; cursor: pointer;
+    }
+    #select .tile:hover {
+      transform: translateY(-4px) scale(1.06) !important;
+      border-color: #facc15;
+      box-shadow: 0 6px 16px rgba(250, 204, 21, 0.45);
+    }
+    #select .tile img { object-position: 50% 22%; border-radius: 0; }
+    #select .tile.p1 { border-color: #facc15; box-shadow: 0 0 14px rgba(250, 204, 21, 0.85); }
+    #select .tile.p2 { border-color: #22d3ee; box-shadow: 0 0 14px rgba(34, 211, 238, 0.85); }
+    #select .tile .cur.p1 { background: #facc15; color: #1a0605; left: 2px; top: -8px; }
+    #select .tile .cur.p2 { background: #22d3ee; color: #04202b; right: 2px; top: -8px; }
+    #select .options button,
+    #select .sel-actions button {
+      pointer-events: auto;
+      cursor: pointer;
+      transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+    }
+    #select .options { gap: 8px 16px; }
+    #select .difficulty {
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 16px;
+      gap: 5px;
+    }
+    #select .difficulty button {
+      border-radius: 999px;
+      padding: 2px 12px 1px;
+      border: 1px solid rgba(250, 204, 21, 0.4);
+      background: rgba(10, 6, 20, 0.65);
+    }
+    #select .difficulty button.selected {
+      background: linear-gradient(135deg, #e11d48, #b91c1c);
+      border-color: #facc15;
+      color: #fffbe0;
+      box-shadow: 0 0 12px rgba(225, 29, 72, 0.65);
+    }
+    #select .sel-actions { gap: 10px; }
+    #select .sel-actions .online-btn {
+      width: 210px; height: 46px; font-size: 19px; border-radius: 10px;
+      background: linear-gradient(135deg, rgba(14, 116, 144, 0.9), rgba(15, 23, 42, 0.95));
+      border: 1px solid rgba(34, 211, 238, 0.65);
+    }
+    #select .sel-actions button.big {
+      width: 250px; height: 48px; border-radius: 10px;
+      background: linear-gradient(135deg, #facc15 0%, #ea580c 48%, #e11d48 100%);
+      border: 2px solid #fff7d6;
+      box-shadow: 0 4px 20px rgba(225, 29, 72, 0.55);
+      clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
+    }
+    #select .sel-actions button:hover { transform: translateY(-2px); filter: brightness(1.1); }
+    #select .plate {
+      z-index: 20;
+      pointer-events: auto;
+      top: 96px; bottom: auto;
+      width: min(300px, 23vw);
+      background: linear-gradient(135deg, rgba(16, 8, 26, 0.86), rgba(32, 8, 18, 0.90));
+      backdrop-filter: blur(10px);
+      border-top: 2px solid var(--accent, #facc15);
+      border-bottom: 1px solid rgba(250, 204, 21, 0.35);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+    }
+    #select .plate.p1 { left: 16px; clip-path: polygon(0 0, 100% 0, 94% 100%, 0 100%); }
+    #select .plate.p2 { right: 16px; clip-path: polygon(6% 0, 100% 0, 100% 100%, 0 100%); }
+    /* ===== ROHINI THEATRE FDFS HUD: neon cinema ticket stubs / flex banners + Paal Abhishekam ===== */
+    #hud .top { gap: 0; align-items: center; }
+    #hud .side { position: relative; gap: 0; align-items: center; }
+    #hud .side.left { flex-direction: row-reverse; }
+    #hud .side.right { flex-direction: row; }
+    #hud .portrait {
+      position: relative; z-index: 3;
+      width: 84px; height: 84px; flex: 0 0 auto;
+      border: 0; border-radius: 0; padding: 4px;
+      background: linear-gradient(135deg, #fff3b0, #facc15 40%, #991b1b 60%, #e11d48);
+      clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+      filter: drop-shadow(0 0 12px var(--accent, #ffd23f));
+      box-shadow: none;
+    }
+    #hud .side.left .portrait { margin-left: -14px; }
+    #hud .side.right .portrait { margin-right: -14px; }
+    #hud .bar-wrap {
+      position: relative;
+      background: linear-gradient(180deg, rgba(24, 6, 18, 0.88), rgba(45, 8, 20, 0.84));
+      border: 2px solid rgba(250, 204, 21, 0.72);
+      padding: 6px 14px 8px;
+      box-shadow: 0 0 18px rgba(225, 29, 72, 0.45), inset 0 0 12px rgba(250, 204, 21, 0.16);
+      -webkit-mask: radial-gradient(circle at 0 50%, transparent 9px, #000 10px), radial-gradient(circle at 100% 50%, transparent 9px, #000 10px);
+      -webkit-mask-composite: source-in;
+      mask: radial-gradient(circle at 0 50%, transparent 9px, #000 10px) intersect, radial-gradient(circle at 100% 50%, transparent 9px, #000 10px);
+    }
+    #hud .bar-wrap::before {
+      content: "★ ROHINI THEATRE FDFS · VINYL CUTOUT ★";
+      display: block; font-size: 9px; letter-spacing: 2px; color: #fde047; opacity: 0.85;
+      margin-bottom: 2px;
+    }
+    #hud .side.left .bar-wrap { padding-right: 16px; border-right: 3px dashed #facc15; text-align: right; }
+    #hud .side.right .bar-wrap { padding-left: 16px; border-left: 3px dashed #facc15; text-align: left; }
+    #hud .name {
+      display: inline-block; max-width: 100%;
+      font-size: 20px; letter-spacing: 3px; color: #1a0605; text-shadow: none;
+      background: linear-gradient(90deg, #fde047, var(--accent, #ffd23f));
+      padding: 2px 14px 0;
+      clip-path: polygon(6% 0, 100% 0, 94% 100%, 0 100%);
+      margin-bottom: 4px;
+    }
+    #hud .hp {
+      height: 24px; border: 0; border-radius: 2px;
+      background: #14040a;
+      box-shadow: inset 0 0 0 2px #facc15, 0 0 12px rgba(34, 211, 238, 0.45);
+      outline: 2px dashed rgba(255, 210, 63, 0.6); outline-offset: 2px;
+    }
+    /* Paal Abhishekam Milk-Packet Splash on 5+ Hit Combos */
+    #hud .milk-splash {
+      position: absolute; inset: -14px -8px -18px; pointer-events: none; z-index: 6; opacity: 0;
+      background:
+        radial-gradient(circle at 18% 35%, rgba(255,255,255,0.96) 0 18px, transparent 22px),
+        radial-gradient(circle at 46% 62%, rgba(255,255,255,0.94) 0 24px, transparent 30px),
+        radial-gradient(circle at 75% 30%, rgba(255,255,255,0.95) 0 20px, transparent 25px),
+        linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(240,249,255,0.45) 55%, transparent 100%);
+      border-radius: 12px;
+    }
+    #hud .paal-badge {
+      position: absolute; top: 100%; left: 50%; transform: translateX(-50%) scale(0.7);
+      opacity: 0; pointer-events: none; z-index: 7; white-space: nowrap;
+      background: linear-gradient(90deg, #ffffff, #e0f2fe); color: #1e3a8a;
+      border: 2px solid #38bdf8; border-radius: 999px; padding: 2px 12px;
+      font-size: 13px; letter-spacing: 2px; font-weight: 700;
+      box-shadow: 0 4px 16px rgba(255,255,255,0.75);
+    }
+    #hud .side.paal-active .milk-splash { animation: milkSplash 1.4s ease-out forwards; }
+    #hud .side.paal-active .paal-badge { animation: paalBadgePop 1.5s ease-out forwards; }
+    @keyframes milkSplash {
+      0% { opacity: 0; transform: translateY(-24px) scale(0.85); }
+      18% { opacity: 0.96; transform: translateY(4px) scale(1.06); }
+      70% { opacity: 0.85; transform: translateY(10px) scale(1.02); }
+      100% { opacity: 0; transform: translateY(22px) scale(1); }
+    }
+    @keyframes paalBadgePop {
+      0% { opacity: 0; transform: translateX(-50%) scale(0.5); }
+      18% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+      80% { opacity: 1; transform: translateX(-50%) scale(1); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(8px) scale(0.95); }
+    }
+    /* HP drains away from the centre medallion (mirrors FightKaro's direction) */
+    #hud .side.left .hp { transform: scaleX(-1); }
+    #hud .side.right .hp { transform: none; }
+    #hud .hp-trail { background: #f8fafc; }
+    #hud .hp-fill {
+      background: linear-gradient(180deg, #34d399 0%, #059669 55%, #065f46 100%);
+      box-shadow: inset 0 3px 0 rgba(255,255,255,0.35);
+    }
+    #hud .hp-fill.danger { background: linear-gradient(180deg, #fb7185, #dc2626 55%, #7f1d1d); }
+    #hud .wins { display: inline-flex; gap: 9px; margin-top: 7px; }
+    #hud .win {
+      width: 13px; height: 13px; border-radius: 2px; transform: rotate(45deg);
+      border: 2px solid #ffd23f; background: rgba(0,0,0,0.55);
+    }
+    #hud .win.on { background: radial-gradient(circle, #fff, #e11d48 70%); box-shadow: 0 0 10px #e11d48; }
+    #timer {
+      position: relative; z-index: 4;
+      min-width: 92px; text-align: center;
+      background: radial-gradient(circle at 50% 35%, #3b0a10, #12030a);
+      border: 3px solid #ffd23f; border-radius: 50%;
+      width: 92px; height: 92px; line-height: 92px !important;
+      box-shadow: 0 0 0 4px #7f1d1d, 0 0 22px rgba(255, 190, 59, 0.6);
+    }
+    #pause-btn { top: 112px; }
+    #hud .combo { top: 150px; }
+
+    /* ===== GETHU GAUGE: vertical 4-cell pillars on the screen edges ===== */
+    #hud .bottom { position: static; display: block; }
+    #hud .meter {
+      position: fixed; top: 50%; width: 64px; height: 300px;
+      transform: translateY(-40%);
+    }
+    #hud .meter.left { left: 10px; }
+    #hud .meter.right { right: 10px; text-align: center; }
+    /* Normal horizontal track (JS sets fill width %) rotated upright: fills bottom -> top */
+    #hud .meter-bar,
+    #hud .meter.right .meter-bar {
+      position: absolute; left: 50%; top: 120px;
+      width: 230px; height: 26px;
+      transform: translate(-50%, -50%) rotate(-90deg);
+      border: 2px solid #ffd23f; border-radius: 14px;
+      background: rgba(10, 4, 18, 0.72); overflow: hidden;
+      box-shadow: 0 0 0 3px rgba(20, 3, 6, 0.75);
+    }
+    #hud .meter-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #22d3ee 0%, #facc15 55%, #e11d48 100%);
+    }
+    #hud .meter-bar::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: repeating-linear-gradient(90deg, transparent 0 calc(25% - 2px), #ffd23f calc(25% - 2px) 25%);
+    }
+    #hud .meter-label {
+      position: absolute; left: 0; right: 0; top: 248px;
+      font-size: 14px; letter-spacing: 2px; line-height: 1.05; text-align: center;
+      color: #1a0605; text-shadow: none; background: #ffd23f;
+      padding: 4px 2px 6px; border-radius: 3px; white-space: normal;
+      clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%);
+    }
+    #hud .meter-bar.ready { box-shadow: 0 0 18px #facc15, 0 0 34px #e11d48; animation: .35s infinite alternate pulse; }
+    #hud .meter:has(.meter-bar.ready) .meter-label { background: #e11d48; color: #fff; animation: .35s infinite alternate pulse; }
+
+    /* ===== GST MAAMI: tax-raid dossier card docked under the timer ===== */
+    #budget-meter {
+      top: 150px; bottom: auto !important; left: 50%;
+      transform: translate(-50%, -10px);
+      padding: 6px 12px 6px 6px !important; gap: 10px;
+      border-radius: 4px; border: 2px solid #ffd23f;
+      background: linear-gradient(135deg, rgba(127, 29, 29, 0.94), rgba(40, 6, 10, 0.94));
+      box-shadow: 0 0 0 3px rgba(20, 3, 6, 0.8), 0 6px 18px rgba(0,0,0,0.5);
+      color: #fff3c4; font-size: 14px !important;
+    }
+    #budget-meter.show { transform: translate(-50%, 0); }
+    #budget-meter .gst-stamp {
+      position: absolute; top: -11px; right: -14px;
+      background: #e11d48; color: #fff; font-size: 11px; letter-spacing: 2px;
+      padding: 1px 7px; border: 2px solid #fff; transform: rotate(8deg);
+    }
+    #budget-meter .gst-avatar {
+      width: 42px; height: 42px; object-fit: cover; object-position: 50% 20%;
+      border-radius: 50%; border: 2px solid #ffd23f; background: #2a0a0a;
+    }
+    #budget-meter .gst-body { display: flex; flex-direction: column; gap: 3px; }
+    #budget-meter .label { letter-spacing: 3px; color: #ffd23f; }
+    #budget-meter .track {
+      width: min(150px, 22vw); height: 10px; border-radius: 0;
+      background: rgba(255,255,255,0.12); position: relative;
+    }
+    #budget-meter .track::after {
+      content: ""; position: absolute; inset: 0;
+      background: repeating-linear-gradient(90deg, transparent 0 calc(25% - 2px), #12030a calc(25% - 2px) 25%);
+    }
+    #budget-meter i { background: linear-gradient(90deg, #facc15, #f97316 50%, #e11d48); }
+    #budget-meter .slabs { display: flex; justify-content: space-between; width: min(150px, 22vw); font-size: 10px; letter-spacing: 0; color: #fca5a5; }
+    #budget-meter .slabs b { font-weight: 400; }
+    #budget-meter .key {
+      display: inline-flex !important; align-items: center; justify-content: center;
+      width: 30px; height: 34px; padding: 0; border: 0; font-size: 18px;
+      color: #1a0605; background: #ffd23f;
+      clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+    }
+    #budget-meter .hint { bottom: auto; top: calc(100% + 10px); }
+    #budget-meter.ready { animation: .9s ease-in-out infinite budget-ready; border-color: #fff3c4; }
+    #budget-meter.ready .slabs { color: #fde047; }
+
+    @media (max-width: 760px), (max-height: 520px) {
+      #hud .portrait { width: 50px; height: 50px; padding: 3px; }
+      #hud .side.left .portrait { margin-left: -8px; }
+      #hud .side.right .portrait { margin-right: -8px; }
+      #hud .name { font-size: 13px; padding: 1px 9px 0; letter-spacing: 1px; }
+      #hud .hp { height: 15px; }
+      #hud .win { width: 9px; height: 9px; }
+      #timer { width: 58px; height: 58px; min-width: 58px; line-height: 58px !important; font-size: 34px !important; }
+      #pause-btn { top: 70px; }
+      #hud .combo { top: 100px; }
+      #hud .meter { width: 44px; height: 180px; }
+      #hud .meter-bar, #hud .meter.right .meter-bar { width: 130px; height: 16px; top: 70px; }
+      #hud .meter-label { top: 142px; font-size: 10px; letter-spacing: 1px; }
+      #budget-meter { top: 102px; }
+      #budget-meter .gst-avatar { width: 30px; height: 30px; }
+    }
+    /* ===== REPLACE TV NEWS BROADCAST & TICKER WITH YOUTUBE FAN WAR COMMENT FEED ===== */
+    #newsdesk, #newsdesk .desk, #newsdesk .ticker { display: none !important; }
+    #fanwar-feed {
+      position: fixed; right: 86px; bottom: 26px; z-index: 22;
+      width: min(330px, 34vw); display: flex; flex-direction: column; gap: 7px;
+      pointer-events: none;
+    }
+    #fanwar-feed .fan-msg {
+      display: flex; align-items: center; gap: 9px; padding: 7px 10px;
+      background: linear-gradient(135deg, rgba(15, 10, 26, 0.92), rgba(32, 8, 22, 0.9));
+      border: 1px solid rgba(250, 204, 21, 0.45); border-left: 4px solid #e11d48;
+      border-radius: 8px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+      animation: fanIn 0.24s ease-out both; transition: opacity 0.3s, transform 0.3s;
+    }
+    #fanwar-feed .fan-msg.hot {
+      border-color: #facc15; border-left-color: #22d3ee;
+      background: linear-gradient(135deg, rgba(127, 29, 29, 0.94), rgba(15, 23, 42, 0.94));
+    }
+    #fanwar-feed .fan-msg.fade { opacity: 0; transform: translateX(18px); }
+    #fanwar-feed .fan-thumb {
+      width: 44px; height: 32px; flex: 0 0 auto; border-radius: 4px;
+      border: 2px solid #facc15; background: #18181b;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; letter-spacing: 1px; color: #fff; font-weight: 700;
+    }
+    #fanwar-feed .fan-body { display: flex; flex-direction: column; font-size: 12px; line-height: 1.25; color: #f8fafc; text-align: left; }
+    #fanwar-feed .fan-body b { font-size: 11px; letter-spacing: 1px; }
+    @keyframes fanIn { from { opacity: 0; transform: translateX(22px); } to { opacity: 1; transform: translateX(0); } }
+    html.super-view #fanwar-feed { opacity: 0.15; }
+    @media (max-width: 760px), (max-height: 520px) {
+      #fanwar-feed { right: 12px; bottom: 10px; width: 210px; }
+      #fanwar-feed .fan-thumb { display: none; }
+    }
+
+    /* ===== CENSOR BOARD RED CARD LOCK BADGE ===== */
+    #censor-lock-badge {
+      position: fixed; top: 220px; left: 50%; transform: translateX(-50%); z-index: 28;
+      background: linear-gradient(90deg, #991b1b, #dc2626); color: #fef08a;
+      border: 2px solid #fde047; border-radius: 6px; padding: 5px 14px;
+      font-size: 14px; letter-spacing: 2px; box-shadow: 0 0 18px rgba(239, 68, 68, 0.8);
+      pointer-events: none; animation: 0.45s infinite alternate pulse;
+    }
+    #censor-lock-badge.hidden { display: none; }
+
+    /* ===== INTERVAL BLOCK OLD-SCHOOL THEATRE SLIDE ADVERTISEMENT ===== */
+    .theatre-slide-ad {
+      width: min(460px, 86vw); margin: 8px 0 12px; padding: 14px 18px;
+      background: repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 4px),
+                  linear-gradient(135deg, #3b1708, #1a0b04 55%, #0e2438);
+      border: 4px double #facc15; border-radius: 8px; text-align: center;
+      box-shadow: 0 0 36px rgba(250, 204, 21, 0.25), inset 0 0 28px rgba(0,0,0,0.65);
+      position: relative;
+    }
+    .theatre-slide-ad .slide-kicker {
+      font-size: 11px; letter-spacing: 3px; color: #fde047; border-bottom: 1px dashed rgba(250, 204, 21, 0.5);
+      padding-bottom: 4px; margin-bottom: 6px;
+    }
+    .theatre-slide-ad .slide-brand {
+      font-size: 24px; letter-spacing: 3px; color: #fff7ed; text-shadow: 2px 2px #7c2d12;
+    }
+    .theatre-slide-ad .slide-copy {
+      font-size: 13px; letter-spacing: 1px; color: #bae6fd; margin-top: 4px;
+    }
+    .theatre-slide-ad .slide-notice {
+      margin-top: 8px; font-size: 11px; letter-spacing: 2px; color: #fca5a5;
+      background: rgba(0,0,0,0.4); padding: 3px 8px; border-radius: 4px; display: inline-block;
+    }
+
+    /* ===== BOX OFFICE COLLECTION RECEIPT & TANGLISH ROAST POSTER ===== */
+    .boxoffice-crores {
+      text-align: center; background: linear-gradient(90deg, #b91c1c, #e11d48, #b91c1c);
+      color: #fef08a; font-size: clamp(20px, 2.8vw, 30px); letter-spacing: 2px;
+      padding: 6px 12px; margin: 6px 0; border: 2px dashed #facc15;
+      text-shadow: 2px 2px #450a0a;
+    }
+    .tanglish-roast {
+      background: #18181b; color: #facc15; border-left: 5px solid #22d3ee;
+      padding: 7px 12px; margin: 6px 0; font-size: 15px; letter-spacing: 0.5px;
+      font-family: system-ui, sans-serif; font-weight: 700;
+    }
+    .receipt-lines {
+      font-family: monospace; font-size: 12px; color: #3f2e21;
+      border-top: 1px dashed #7f1d1d; border-bottom: 1px dashed #7f1d1d;
+      padding: 5px 0; margin: 6px 0; line-height: 1.45;
+    }
+    html.diwali #title .tag:after {
+      content: " · 🌾 PONGAL ARENA" !important;
+      color: #ffd23f;
+    }
+    html.diwali [data-stage=sansad]:before {
+      display: none !important;
+    }
+    #fight-btn {
+      font-size: clamp(18px, 2vw, 24px) !important;
+      line-height: 1.05 !important;
+      white-space: nowrap !important;
+    }
+    #select [data-tile] span,
+    #select .tile-name {
+      font-size: 10px !important;
+      letter-spacing: 0.01em !important;
+      white-space: nowrap !important;
+    }
+    /* ===== TITLE: FDFS cinema-ticket + temple-gopuram marquee ===== */
+    #title {
+      align-items: flex-start; justify-content: center; padding-left: 7vw; gap: 0; overflow: hidden;
+      background:
+        radial-gradient(circle at 22% 45%, rgba(225, 29, 72, 0.34), transparent 55%),
+        radial-gradient(circle at 85% 70%, rgba(14, 116, 144, 0.30), transparent 55%),
+        radial-gradient(circle, rgba(250, 204, 21, 0.14) 1.5px, transparent 2px) 0 0 / 26px 26px,
+        linear-gradient(155deg, rgba(32, 4, 12, 0.78), rgba(8, 6, 26, 0.72));
+    }
+    #title .t-border {
+      position: absolute; left: 0; right: 0; height: 18px;
+      background: repeating-linear-gradient(90deg, #facc15 0 18px, #b91c1c 18px 22px, #facc15 22px 26px, #7f1d1d 26px 44px);
+      box-shadow: 0 0 18px rgba(250, 204, 21, 0.45);
+    }
+    #title .t-border.top { top: 0; }
+    #title .t-border.bottom { bottom: 0; }
+    #title .t-gopuram {
+      position: absolute; bottom: 18px; width: 240px; height: 62vh; opacity: .22; pointer-events: none;
+      background: linear-gradient(180deg, #facc15, #b45309);
+      clip-path: polygon(46% 0, 54% 0, 56% 6%, 64% 8%, 66% 20%, 74% 22%, 76% 36%, 84% 38%, 86% 54%, 94% 56%, 96% 74%, 100% 76%, 100% 100%, 0 100%, 0 76%, 4% 74%, 6% 56%, 14% 54%, 16% 38%, 24% 36%, 26% 22%, 34% 20%, 36% 8%, 44% 6%);
+    }
+    #title .t-gopuram.left { left: -60px; }
+    #title .t-gopuram.right { right: -40px; height: 74vh; opacity: .16; }
+    #title .t-main { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; text-align: left; max-width: 58vw; }
+    #title .t-kicker {
+      font-size: 16px; letter-spacing: 4px; color: #fde047;
+      border-left: 4px solid #e11d48; padding: 2px 10px; background: rgba(0,0,0,0.35);
+    }
+    #title .logo { font-size: clamp(64px, 10vw, 150px); line-height: .9; margin-top: 10px; transform: skewX(-6deg); }
+    #title .logo span { display: inline; margin-left: .15em; }
+    #title .t-tamil { font-family: system-ui, "Nirmala UI", sans-serif; font-weight: 700; font-size: clamp(14px, 1.6vw, 22px); color: #fecaca; letter-spacing: 1px; margin-top: 8px; }
+    #title .tag { font-size: 26px; letter-spacing: 8px; color: #fde68a; margin-top: 4px; }
+    #title .t-ticket {
+      display: flex; margin-top: 30px; filter: drop-shadow(0 8px 18px rgba(0,0,0,0.55));
+      animation: t-ticket-bob 2.4s ease-in-out infinite;
+    }
+    @keyframes t-ticket-bob { 50% { transform: translateY(-5px) rotate(-.6deg); } }
+    #title .t-stub {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      width: 92px; padding-left: 14px; box-sizing: border-box;
+      background: #e11d48; color: #fff; font-size: 14px; letter-spacing: 3px;
+      border-right: 3px dashed #fde047;
+      -webkit-mask: radial-gradient(circle at 0 50%, transparent 12px, #000 13px);
+              mask: radial-gradient(circle at 0 50%, transparent 12px, #000 13px);
+    }
+    #title .t-stub b { font-size: 26px; font-weight: 400; }
+    #title .t-ticket-body {
+      padding: 12px 26px 10px; background: linear-gradient(135deg, #fde047, #f59e0b);
+      color: #2a0606;
+      -webkit-mask: radial-gradient(circle at 100% 50%, transparent 12px, #000 13px);
+              mask: radial-gradient(circle at 100% 50%, transparent 12px, #000 13px);
+    }
+    #title .press, html.touch #title .press-touch { margin: 0; font-size: 30px; letter-spacing: 3px; color: #2a0606; text-shadow: none; }
+    #title .t-ticket-meta { font-size: 13px; letter-spacing: 2px; opacity: .75; margin-top: 2px; }
+    #title .t-roster {
+      position: absolute; right: 6vw; top: 50%; transform: translateY(-50%);
+      display: grid; grid-template-columns: repeat(3, 92px); gap: 12px; z-index: 2;
+    }
+    #title .t-roster img {
+      width: 92px; height: 92px; object-fit: cover; object-position: 50% 22%;
+      clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+      background: #2a0a0a; filter: saturate(1.1) drop-shadow(0 0 6px #facc15);
+      animation: t-card 3.2s ease-in-out infinite;
+    }
+    #title .t-roster img:nth-child(3n+2) { transform: translateY(46px); animation-delay: .4s; }
+    #title .t-roster img:nth-child(3n) { animation-delay: .8s; }
+    #title .t-roster img:last-child { grid-column: 2; }
+    @keyframes t-card { 50% { filter: saturate(1.4) drop-shadow(0 0 14px #e11d48); } }
+    #title .disclaimer { bottom: 28px; left: 0; right: 0; font-size: 14px; }
+    @media (max-width: 900px), (max-height: 520px) {
+      #title { padding-left: 5vw; }
+      #title .t-roster { grid-template-columns: repeat(3, 54px); gap: 6px; right: 3vw; }
+      #title .t-roster img { width: 54px; height: 54px; }
+      #title .t-roster img:nth-child(3n+2) { transform: translateY(26px); }
+      #title .t-kicker { font-size: 11px; }
+      #title .tag { font-size: 16px; letter-spacing: 4px; }
+      #title .t-ticket { margin-top: 12px; }
+      #title .press, html.touch #title .press-touch { font-size: 20px; }
+      #title .t-gopuram { display: none; }
+    }
+
+    /* ===== Popups / speech above HUD ===== */
+    #popups { z-index: 30; }
+
+    /* ===== LIVE BOX: split "Pattimandram" debate lower-thirds in the bottom corners ===== */
+    #newsdesk .desk {
+      display: block; position: static; transform: none; width: auto;
+      background: none; border: 0; padding: 0; box-shadow: none;
+      transition: opacity .35s;
+    }
+    #newsdesk .vs-mini { display: none; }
+    #newsdesk .live {
+      position: absolute; left: 18px; bottom: 116px; top: auto;
+      font-size: 13px; letter-spacing: 2px; padding: 1px 8px; border-radius: 0;
+      background: #e11d48; border: 1px solid #fde047;
+      clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%);
+    }
+    #newsdesk .live::after { content: " · PATTIMANDRAM"; color: #fde047; }
+    #newsdesk .anchor {
+      position: absolute; bottom: 44px; height: 66px;
+      width: min(330px, 34vw); box-sizing: border-box;
+      gap: 9px; padding: 6px 22px 6px 8px;
+      background: linear-gradient(90deg, rgba(127, 29, 29, 0.95), rgba(185, 28, 28, 0.9) 70%, rgba(185, 28, 28, 0.55));
+      border-left: 6px solid #facc15; border-bottom: 3px solid #facc15;
+      clip-path: polygon(0 0, 100% 0, 93% 100%, 0 100%);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    }
+    #newsdesk .anchor.godi { left: 18px; }
+    #newsdesk .anchor.troll {
+      right: 18px; text-align: right;
+      padding: 6px 8px 6px 22px;
+      background: linear-gradient(270deg, rgba(8, 47, 73, 0.95), rgba(14, 116, 144, 0.9) 70%, rgba(14, 116, 144, 0.55));
+      border-left: 0; border-right: 6px solid #22d3ee; border-bottom-color: #22d3ee;
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 7% 100%);
+    }
+    #newsdesk .anchor img {
+      width: 50px; height: 50px; border-radius: 50%;
+      border: 2px solid #facc15; object-fit: cover; background: #1a0606;
+    }
+    #newsdesk .anchor.troll img { border-color: #22d3ee; }
+    #newsdesk .channel {
+      align-self: flex-start; font-size: 12px; letter-spacing: 2px;
+      color: #1a0605; background: #facc15; padding: 0 6px; margin-bottom: 2px;
+    }
+    #newsdesk .troll .channel { align-self: flex-end; color: #04202b; background: #22d3ee; }
+    #newsdesk .who { opacity: .85; font-size: 10px; color: #fde68a; }
+    #newsdesk .troll .who { color: #a5f3fc; }
+    #newsdesk .line { font-size: 12px; -webkit-line-clamp: 2; }
+    #newsdesk .anchor.talking { filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.7)); }
+    html.super-view #newsdesk .desk { opacity: 0; }
+    @media (max-height: 520px) { #newsdesk .desk { display: none; } }
+
+    /* ===== LOADING, LEGAL, ONLINE, PAUSE, SUPER BANNER, ANNOUNCE & RESULT VERDICT ===== */
+    .screen:not(.hidden) { animation: screenReveal 0.22s ease-out both; }
+    @keyframes screenReveal { from { opacity: 0; transform: scale(1.015); } to { opacity: 1; transform: scale(1); } }
+
+    #loading {
+      background:
+        radial-gradient(circle at 50% 45%, rgba(225, 29, 72, 0.28), transparent 55%),
+        radial-gradient(circle, rgba(250, 204, 21, 0.14) 1.5px, transparent 2px) 0 0 / 26px 26px,
+        linear-gradient(155deg, #24050e, #09061a);
+    }
+    #loading p { letter-spacing: 5px; color: #fde68a; font-size: 20px; }
+    #loading .load-bar {
+      width: min(380px, 68vw); height: 10px; margin-top: 4px;
+      border-radius: 999px; border: 1px solid rgba(250, 204, 21, 0.5);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 18px rgba(225, 29, 72, 0.35);
+    }
+    #loading .load-bar i {
+      background: linear-gradient(90deg, #e11d48, #facc15 65%, #fff7d6);
+      border-radius: 999px;
+    }
+
+    #legal {
+      background: linear-gradient(155deg, rgba(26, 4, 10, 0.94), rgba(8, 6, 24, 0.94));
+    }
+    .legal-card {
+      background: linear-gradient(180deg, rgba(24, 8, 30, 0.96), rgba(38, 8, 16, 0.96));
+      border: 2px solid #facc15;
+      border-radius: 16px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75);
+    }
+    #legal-ok {
+      background: linear-gradient(135deg, #facc15, #e11d48);
+      border-color: #fff7d6;
+      text-shadow: 1px 1px #2a040d;
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+    #legal-ok:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+    #online, #pause {
+      z-index: 45;
+      background: radial-gradient(circle at 50% 45%, rgba(225, 29, 72, 0.22), rgba(8, 6, 22, 0.92));
+      backdrop-filter: blur(8px);
+    }
+    #online h1, #pause h1 {
+      background: linear-gradient(180deg, #fffdf4 10%, #facc15 60%, #e11d48 95%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      text-shadow: none; filter: drop-shadow(3px 3px #2e0712);
+    }
+    .on-panel {
+      background: linear-gradient(180deg, rgba(20, 8, 28, 0.92), rgba(36, 8, 18, 0.92));
+      border: 2px solid rgba(250, 204, 21, 0.5);
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.6);
+    }
+    #pause button {
+      min-width: 240px; border-radius: 10px;
+      border: 2px solid #facc15;
+      background: linear-gradient(135deg, rgba(30, 10, 32, 0.9), rgba(68, 12, 24, 0.9));
+      transition: transform 0.14s ease, background 0.14s ease;
+    }
+    #pause button:hover { transform: translateY(-2px); background: linear-gradient(135deg, #e11d48, #991b1b); }
+
+    #super-banner {
+      border-top: 3px solid #facc15; border-bottom: 3px solid #e11d48;
+      background: linear-gradient(90deg, transparent, rgba(16, 6, 26, 0.92) 15% 85%, transparent);
+    }
+    #announce {
+      background: linear-gradient(180deg, #fffbe6 8%, #facc15 48%, #e11d48 92%);
+      -webkit-background-clip: text; background-clip: text;
+      filter: drop-shadow(4px 4px #2a040d) drop-shadow(0 0 22px rgba(250, 204, 21, 0.65));
+    }
+    #ig-link { display: none !important; }
+    #support-btn {
+      top: 12px; left: 14px;
+      background: linear-gradient(135deg, #991b1b, #2b0714);
+      border-color: #facc15;
+    }
+
+    /* ===== RESULT VERDICT CARD: Dakshin Chronicle Tabloid Edition ===== */
+    #result {
+      background:
+        radial-gradient(circle at 50% 42%, rgba(225, 29, 72, 0.24), transparent 58%),
+        linear-gradient(160deg, rgba(14, 5, 18, 0.90), rgba(8, 6, 24, 0.92));
+      backdrop-filter: blur(8px);
+      overflow-y: auto;
+      padding: 12px 10px 18px;
+      justify-content: center;
+    }
+    #result .stamp { bottom: auto; top: 12px; left: 16px; right: auto; z-index: 5; }
+    .paper {
+      transform: rotate(-0.35deg);
+      background: linear-gradient(180deg, #fffdf7 0%, #fbf3df 100%);
+      border: 3px solid #b91c1c;
+      outline: 3px solid #facc15;
+      outline-offset: -8px;
+      border-radius: 6px;
+      padding: 10px 18px 12px !important;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.72), 0 0 28px rgba(250, 204, 21, 0.22);
+    }
+    @media (max-height: 740px), (max-width: 760px) {
+      #result { justify-content: flex-start; gap: 6px; }
+      .paper .masthead { font-size: clamp(22px, 4vw, 34px) !important; }
+      .paper figure img { max-height: 120px; width: auto; }
+      .result-buttons { flex-wrap: wrap; justify-content: center; padding-bottom: 10px; }
+      .result-buttons button { min-width: 150px; height: 42px; font-size: 16px; }
+    }
+    .paper .masthead {
+      color: #7f1d1d;
+      border-bottom: 4px solid #b91c1c;
+      letter-spacing: 3px;
+    }
+    .paper .dateline {
+      background: #991b1b;
+      color: #fef08a;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 4px 8px;
+      margin-top: 3px;
+      border-bottom: 0;
+    }
+    .paper .headline { color: #18080c; letter-spacing: 1.5px; }
+    .paper figure img {
+      filter: contrast(1.06) saturate(1.1) !important;
+      border: 3px solid #b91c1c;
+      border-radius: 6px;
+      background: radial-gradient(circle, #38121f, #140812);
+    }
+    .paper .excuse {
+      border-left: 4px solid #e11d48;
+      padding: 4px 10px;
+      background: rgba(225, 29, 72, 0.08);
+      color: #3b0a14;
+    }
+    .result-buttons button {
+      background: linear-gradient(135deg, rgba(20, 8, 28, 0.92), rgba(45, 8, 20, 0.92));
+      border: 2px solid #facc15;
+      border-radius: 10px;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+    .result-buttons button:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(135deg, #e11d48, #991b1b);
+    }
+
+    @media (max-width: 900px), (max-height: 560px) {
+      #select .sel-center { width: min(680px, 94vw); bottom: 8px; padding: 8px 10px; }
+      #select .plate { top: 82px; width: min(210px, 28vw); padding: 6px 12px; }
+      #select .controls { display: block; top: 44px; font-size: 10px; padding: 3px 10px; max-width: 94vw; overflow: hidden; text-overflow: ellipsis; }
+      #support-btn { top: 6px; left: 8px; padding: 3px 8px; font-size: 11px; }
+      #select .sel-actions { flex-wrap: wrap; justify-content: center; gap: 6px; }
+      #select .sel-actions .online-btn { width: auto; min-width: 120px; padding: 0 10px; height: 38px; font-size: 14px; }
+      #select .sel-actions button.big { width: min(210px, 56vw); height: 40px; font-size: 18px !important; }
+      .sel-vs { top: 18%; font-size: 46px; }
+      #select .tile { width: 52px; height: 60px; }
+    }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "/node_modules/three/build/three.module.js",
+      "three/addons/": "/node_modules/three/examples/jsm/",
+      "three/examples/jsm/": "/node_modules/three/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="popups"></div>
+  <div id="flash"></div>
+  <div id="vignette"></div>
+  <div id="super-banner"></div>
+
+  <div id="cinema">
+    <div id="cine-fade"></div>
+    <div class="cine-bar top"></div>
+    <div class="cine-bar bottom"></div>
+    <div id="cine-title"><h1></h1><small></small></div>
+    <div id="cine-caption"></div>
+    <button id="cine-skip" type="button">SKIP ▶</button>
+  </div>
+
+  <div id="trailer-video">
+    <video playsinline preload="none"></video>
+    <div class="load">
+      <small>SOUTH BOX OFFICE</small>
+      <b>TRAILER REEL</b>
+      <span class="wait">Loading reel…</span>
+      <span class="oops">No reel found — skipping to arena!</span>
+      <span class="bar"><i></i></span>
+      <span class="label"></span>
+    </div>
+    <button class="sound" type="button" aria-label="Toggle trailer sound">🔊</button>
+  </div>
+
+  <div id="loading" class="screen">
+    <div class="logo">DAKSHIN <span>SHOWDOWN</span></div>
+    <p>THE GREAT NAARKALI FIGHT · LOADING SABHA...</p>
+    <div class="load-bar"><i id="load-fill"></i></div>
+  </div>
+
+  <div id="legal">
+    <div class="legal-card">
+      <h2>⚖️ PARODY &amp; SATIRE NOTICE · நையாண்டி அறிவிப்பு</h2>
+      <div class="legal-scroll" tabindex="0">
+        <h3>English</h3>
+        <p><strong>Dakshin Showdown — The Great Naarkali Fight</strong> is a strictly non-commercial work of political and pop-culture parody and satire inspired by South Indian politics, cinema tropes, and TV news debates.</p>
+        <p>All characters, voice lines, headlines, and super-moves are fictionalized caricatures intended purely for humor and entertainment. No association with or endorsement by any real individual, political party, actor, or news channel is implied.</p>
+        <hr>
+        <h3>தமிழ் · മലയാളം · ಕನ್ನಡ · తెలుగు</h3>
+        <p><strong>தக்ஷின் ஷோடவுன்</strong> ஒரு முழுமையான நகைச்சுவை மற்றும் அரசியல் நையாண்டி விளையாட்டு மட்டுமே. இதில் இடம்பெறும் கதாபாத்திரங்கள், வசனங்கள் மற்றும் தலைப்புச் செய்திகள் அனைத்தும் பொழுதுபோக்கிற்காக மட்டுமே உருவாக்கப்பட்டவை.</p>
+        <p>Local 2-Player mode, custom South stages (<strong>Marina Beach</strong>, <strong>Koyambedu Bus Stand</strong>, <strong>Arangam Studio</strong>), and <strong>Kootani Cameo Assist (Press B)</strong> are ready out of the box.</p>
+      </div>
+      <div class="legal-agree">
+        <button id="legal-ok" type="button">VANAKKAM — ENTER ARENA →</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="title" class="screen hidden">
+    <div class="t-border top"></div>
+    <div class="t-border bottom"></div>
+    <div class="t-gopuram left"></div>
+    <div class="t-gopuram right"></div>
+    <div class="t-main">
+      <div class="t-kicker">🎬 FIRST DAY FIRST SHOW · 4 STATES · 13 THALAIVARS</div>
+      <div class="logo">DAKSHIN <span>SHOWDOWN</span></div>
+      <div class="t-tamil">தட்சிண் ஷோடவுன் · மாபெரும் நாற்காலி சண்டை</div>
+      <div class="tag">THE GREAT NAARKALI FIGHT</div>
+      <div class="t-ticket">
+        <div class="t-stub">ADMIT<b>ONE</b></div>
+        <div class="t-ticket-body">
+          <div class="press">▶ PRESS ENTER / CLICK TO ENTER ARENA</div>
+          <div class="press-touch">▶ TAP TO ENTER ARENA</div>
+          <div class="t-ticket-meta">SCREEN 1 · MARINA ARENA · ROW A · SEAT 1</div>
+        </div>
+      </div>
+    </div>
+    <div class="t-roster">
+      <img src="/faces/modi.webp?v=20261126" alt=""><img src="/faces/rahul.webp?v=20261126" alt=""><img src="/faces/didi.webp?v=20261126" alt=""><img src="/faces/trump.webp?v=20261126" alt=""><img src="/faces/yogi.webp?v=20261126" alt=""><img src="/faces/nitin.webp?v=20261126" alt=""><img src="/faces/ravi.webp?v=20261126" alt=""><img src="/faces/lalu.webp?v=20261126" alt=""><img src="/faces/mbapu.webp?v=20261126" alt=""><img src="/faces/amit.webp?v=20261126" alt=""><img src="/faces/dhruv.webp?v=20261126" alt=""><img src="/faces/nirmala.webp?v=20261126" alt=""><img src="/faces/rangaraj.webp?v=20261126" alt="">
+    </div>
+    <div class="disclaimer">Pan-South political &amp; pop-culture satire. Not affiliated with any real person, party, or channel.</div>
+  </div>
+
+  <div id="select" class="screen hidden">
+    <h1>SELECT YOUR THALAIVAR</h1>
+    <a id="ig-link" href="#select" title="Dakshin Showdown">SOUTH ARENA EDITION</a>
+    <button id="support-btn" type="button"><span class="cup">☕</span><span>Buy us a Filter Kaapi</span></button>
+
+    <div class="sel-vs">VS</div>
+
+    <div id="plate-p1" class="plate p1">
+      <div class="plate-tag">PLAYER 1 · 1P</div>
+      <div class="plate-name">SURYA ANNA</div>
+      <div class="plate-party">Dravidian Sunset Front</div>
+      <div class="plate-super"></div>
+      <div class="plate-desc"></div>
+    </div>
+
+    <div class="sel-center">
+      <div id="pick-prompt" class="pick-prompt">CHOOSE YOUR FIGHTER · P1 THEN CPU / P2</div>
+      <div id="bapu-quest" class="bapu-quest hidden"></div>
+      <div id="neta-download" class="neta-download hidden">
+        <div class="dl-info"><span id="dl-title">PREPARING FIGHTER...</span><span id="dl-pct">0%</span></div>
+        <div class="dl-track"><i id="dl-fill" class="dl-fill"></i></div>
+      </div>
+
+      <div class="grid">
+        <button class="tile" type="button" data-tile="modi"><img data-portrait="modi" alt="Surya Anna"><span class="cur p1">1P</span><span class="cur p2">CPU</span><span class="tile-name">SURYA ANNA</span></button>
+        <button class="tile" type="button" data-tile="rahul"><img data-portrait="rahul" alt="Thalapathy"><span class="cur p1">1P</span><span class="cur p2">CPU</span><span class="tile-name">THALAPATHY</span></button>
+        <button class="tile" type="button" data-tile="didi"><img data-portrait="didi" alt="Iron Amma"><span class="cur p1">1P</span><span class="cur p2">CPU</span><span class="tile-name">IRON AMMA</span></button>
+        <button class="tile" type="button" data-tile="trump"><img data-portrait="trump" alt="Sandal Raju"><span class="cur p1">1P</span><span class="cur p2">CPU</span><span class="tile-name">SANDAL RAJU</span></button>
+        <button class="tile" type="button" data-tile="yogi"><img data-portrait="yogi" alt="Lal Captain"><span class="cur p1">1P</span><span class="cur p2">CPU</span><span class="tile-name">LAL CAPTAIN</span></button>
+        <button class="tile" type="button" data-tile="nitin"><img data-portrait="nitin" alt="Bande Shiv"><span class="cur p1">1P</span><span class="cur p2">CPU</span><span class="tile-name">BANDE SHIV</span></button>
+        <button class="tile" type="button" data-tile="ravi"><img data-portrait="ravi" alt="Power Star"><span class="cur p1">1P</span><span class="cur p2">CPU</span><span class="tile-name">POWER STAR</span></button>
+        <button class="tile" type="button" data-tile="lalu"><img data-portrait="lalu" alt="Puli Voice"><span class="cur p1">1P</span><span class="cur p2">CPU</span><span class="tile-name">PULI VOICE</span></button>
+        <button class="tile boss" type="button" data-tile="mbapu"><span class="boss-tag">BOSS</span><span class="lock-mark">🔒</span><img data-portrait="mbapu" alt="Thatha Reform"><span class="cur p1">1P</span><span class="cur p2">CPU</span><span class="tile-name">THATHA REFORM</span></button>
+        <button class="tile" type="button" data-tile="amit"><img data-portrait="amit" alt="Files IPS"><span class="cur p1">1P</span><span class="cur p2">CPU</span><span class="tile-name">FILES IPS</span></button>
+        <button class="tile" type="button" data-tile="dhruv"><img data-portrait="dhruv" alt="Squad Bro"><span class="cur p1">1P</span><span class="cur p2">CPU</span><span class="tile-name">SQUAD BRO</span></button>
+        <button class="tile" type="button" data-tile="nirmala"><img data-portrait="nirmala" alt="Tax Maami"><span class="cur p1">1P</span><span class="cur p2">CPU</span><span class="tile-name">TAX MAAMI</span></button>
+        <button class="tile" type="button" data-tile="rangaraj"><img data-portrait="rangaraj" alt="Rangaraj Studio"><span class="cur p1">1P</span><span class="cur p2">CPU</span><span class="tile-name">RANGARAJ</span></button>
+        <button class="tile trailer" type="button" data-tile="trailer"><span class="tile-name">REEL</span></button>
+        <button class="tile" type="button" data-tile="random"><span class="tile-q">?</span><span class="tile-name">RANDOM</span></button>
+      </div>
+
+      <div class="options">
+        <div class="difficulty stage-pick">
+          <span>STAGE:</span>
+          <button type="button" data-stage="marina" class="selected">MARINA BEACH</button>
+          <button type="button" data-stage="jantar">KOYAMBEDU BUS STAND</button>
+          <button type="button" data-stage="road">ARANGAM DEBATE STUDIO</button>
+          <span id="stage-sub" class="sub">Marina Lighthouse, Sundal Carts &amp; 20s Ocean Wave</span>
+        </div>
+        <div class="difficulty assist-pick">
+          <span>KOOTANI CAMEO (B):</span>
+          <button type="button" data-assist="sumo" class="selected">🚙 FLYING SUMO</button>
+          <button type="button" data-assist="squad">🚨 FLYING SQUAD</button>
+          <button type="button" data-assist="light">💡 STUDIO LIGHT</button>
+          <button type="button" data-assist="random">🎲 RANDOM</button>
+        </div>
+        <div class="difficulty cpu-level">
+          <span>CPU:</span>
+          <button type="button" data-diff="easy">CHILL</button>
+          <button type="button" data-diff="normal" class="selected">MASS</button>
+          <button type="button" data-diff="hard">VERITHANAM</button>
+        </div>
+        <div class="online-bar">
+          <span id="online-status">Room · connecting...</span>
+          <button id="online-leave" type="button">LEAVE ROOM</button>
+        </div>
+      </div>
+
+      <div id="vs-line" class="vs">SURYA ANNA (YOU) vs THALAPATHY (CPU)</div>
+
+      <div class="sel-actions">
+        <button id="online-btn" class="online-btn" type="button">🌐 PLAY WITH A FRIEND</button>
+        <button id="local2p-btn" class="online-btn" type="button">⚔️ 2P LOCAL: OFF</button>
+        <button id="fight-btn" class="big" type="button">PODU SANDAI!</button>
+      </div>
+    </div>
+
+    <div id="plate-p2" class="plate p2">
+      <div class="plate-tag">OPPONENT · CPU</div>
+      <div class="plate-name">THALAPATHY</div>
+      <div class="plate-party">Thalapathy Welfare Wing</div>
+      <div class="plate-super"></div>
+      <div class="plate-desc"></div>
+    </div>
+
+    <div class="controls">P1: A/D Move (2x Tap Dash) · W Jump · S Block · Back-Tap Mass Parry · J Punch · K Kick · I Grab · L/Space Super (Hit-Confirm Cancel!) · B Kootani Cameo Assist &nbsp;|&nbsp; P2 (2P Mode): Arrows · U Punch · O Kick · P Grab · Enter Super</div>
+    <div class="touch-help">Drag stick to move &amp; jump · Hold down to block · Tap buttons to attack</div>
+  </div>
+
+  <div id="online" class="screen hidden">
+    <h1>ONLINE SABHA ROOM</h1>
+    <div id="on-home" class="on-panel">
+      <button id="on-host" class="big" type="button">HOST A ROOM</button>
+      <div class="on-or">— OR JOIN WITH 4-LETTER CODE —</div>
+      <form id="on-join-form" class="on-join">
+        <input id="on-code" type="text" maxlength="4" placeholder="ABCD" autocomplete="off" spellcheck="false">
+        <button type="submit">JOIN</button>
+      </form>
+    </div>
+    <div id="on-hosting" class="on-panel hidden">
+      <div class="on-label">SHARE THIS ROOM CODE WITH YOUR FRIEND</div>
+      <div id="on-room-code" class="on-code">----</div>
+      <div class="on-share">
+        <button id="on-copy" class="copy" type="button">COPY INVITE LINK</button>
+        <a id="on-wa" class="wa" href="#" target="_blank" rel="noopener">WHATSAPP INVITE</a>
+      </div>
+      <div class="on-wait">Waiting for opponent to join…</div>
+    </div>
+    <div id="on-connecting" class="on-panel hidden">
+      <div id="on-connecting-text" class="on-wait">Connecting to room…</div>
+    </div>
+    <div id="on-error" class="on-panel hidden">
+      <div id="on-error-text">Connection failed.</div>
+    </div>
+    <button id="on-back" class="on-back" type="button">← BACK TO ROSTER</button>
+  </div>
+
+  <div id="hud" class="hidden">
+    <div class="top">
+      <div class="side left">
+        <img class="portrait" alt="">
+        <div class="bar-wrap">
+          <div class="name"></div>
+          <div class="hp"><div class="hp-trail"></div><div class="hp-fill"></div></div>
+          <div class="wins"><span class="win"></span><span class="win"></span></div>
+        </div>
+        <div class="milk-splash"></div>
+        <div class="paal-badge">🥛 PAAL ABHISHEKAM!</div>
+      </div>
+      <div id="timer">60</div>
+      <div class="side right">
+        <img class="portrait" alt="">
+        <div class="bar-wrap">
+          <div class="name"></div>
+          <div class="hp"><div class="hp-trail"></div><div class="hp-fill"></div></div>
+          <div class="wins"><span class="win"></span><span class="win"></span></div>
+        </div>
+        <div class="milk-splash"></div>
+        <div class="paal-badge">🥛 PAAL ABHISHEKAM!</div>
+      </div>
+    </div>
+    <div class="combo left"></div>
+    <div class="combo right"></div>
+    <div id="announce"></div>
+    <div id="budget-meter">
+      <span class="gst-stamp">KOOTANI</span>
+      <img class="gst-avatar" src="/faces/ravi.webp?v=20261126" alt="">
+      <span class="gst-body">
+        <span class="label">KOOTANI CAMEO</span>
+        <span class="track"><i></i></span>
+        <span class="slabs"><b>SUMO</b><b>IT RAID</b><b>LIGHT</b><b>2s</b></span>
+      </span>
+      <span class="key">B</span>
+      <span class="hint"><span class="hint-key">PRESS B — CALL KOOTANI ASSIST!</span><span class="hint-touch">TAP 🚨 FOR KOOTANI!</span></span>
+    </div>
+    <div id="censor-lock-badge" class="hidden">🟥 CENSOR BOARD RED CARD!</div>
+    <div class="bottom">
+      <div class="meter left"><div class="meter-label">GETHU</div><div class="meter-bar"><div class="meter-fill"></div></div></div>
+      <div class="meter right"><div class="meter-label">GETHU</div><div class="meter-bar"><div class="meter-fill"></div></div></div>
+    </div>
+    <button id="pause-btn" type="button" aria-label="Pause">⏸</button>
+    <div id="fanwar-feed" aria-live="polite"></div>
+    <div id="newsdesk">
+      <div class="desk">
+        <div class="live">● LIVE</div>
+        <div class="anchor godi"><img src="/faces/ravi.webp?v=20261126" alt="Sudu Soru TV"><div class="meta"><div class="channel">SUDU SORU TV</div><div class="who">Rangaraj</div><div class="line">Breaking now!</div></div></div>
+        <div class="vs-mini">VS</div>
+        <div class="anchor troll"><img src="/faces/dhruv.webp?v=20261126" alt="Meme Factory"><div class="meta"><div class="channel">MEME FACTORY</div><div class="who">Admin Pullingo</div><div class="line">Ratio check!</div></div></div>
+      </div>
+      <div class="ticker"><span class="tag">FLASH</span><div class="ticker-window"><div class="ticker-track"></div></div></div>
+    </div>
+  </div>
+
+  <div id="touch">
+    <div class="stick"><div class="ring"></div><div class="knob"></div></div>
+    <div class="actions">
+      <button type="button" class="punch" data-touch="punch">KUTHU</button>
+      <button type="button" class="kick" data-touch="kick">UDHAI</button>
+      <button type="button" class="grab" data-touch="grab">PIDI</button>
+      <button type="button" class="super" data-touch="super">MASS</button>
+      <button id="touch-budget" type="button" class="touch-budget" hidden>🚨</button>
+    </div>
+  </div>
+
+  <div id="pause" class="screen hidden">
+    <h1>INTERVAL BLOCK 🍿</h1>
+    <div class="pause-sub">Filter Kaapi &amp; Samosa Break</div>
+    <div class="theatre-slide-ad">
+      <div class="slide-kicker">📽️ ROHINI SILVER SCREENS · OLD-SCHOOL SLIDE ADVERTISEMENT</div>
+      <div class="slide-brand">SARAVANA SILKS &amp; DEGREE KAAPI</div>
+      <div class="slide-copy">Kumbakonam Filter Kaapi ₹25 · Onion Samosa ₹20 · Molaga Bajji at Gate 2!</div>
+      <div class="slide-notice">PLEASE SILENCE CELL PHONES · NO MILK PACKETS ON PROJECTOR</div>
+    </div>
+    <button id="resume-btn" type="button">RESUME SANDAI</button>
+    <button id="pause-sound-btn" type="button">SOUND: ON</button>
+    <button id="quit-btn" type="button">CHARACTER SELECT</button>
+  </div>
+
+  <div id="result" class="screen hidden">
+    <div id="result-title" class="stamp win">VERITHANAM WIN!</div>
+    <div id="bapu-stats" class="hidden"></div>
+    <div class="paper">
+      <div id="paper-masthead" class="masthead">ROHINI FDFS BOX OFFICE RECEIPT</div>
+      <div id="paper-date" class="dateline"></div>
+      <div id="boxoffice-crores" class="boxoffice-crores">TOTAL COLLECTION: ₹1000 CRORE CLUB! 🏆</div>
+      <div id="paper-headline" class="headline">UNDEFEATED THALAIVAR!</div>
+      <div class="paper-body">
+        <figure><img id="paper-photo" alt="Box Office Winner"><figcaption id="paper-caption"></figcaption></figure>
+        <div class="cols">
+          <div id="paper-sub" class="paper-sub"></div>
+          <div id="tanglish-roast" class="tanglish-roast"></div>
+          <p id="paper-excuse" class="excuse"></p>
+          <div id="receipt-lines" class="receipt-lines">ROHINI SCREEN 1 FDFS · TEA KADAI POSTER · TAX PAID 18% GST</div>
+        </div>
+      </div>
+    </div>
+    <div id="result-sub"></div>
+    <div class="result-buttons">
+      <button id="rematch-btn" type="button">REMATCH</button>
+      <button id="select-btn" type="button">CHARACTER SELECT</button>
+    </div>
+  </div>
+
+  <div id="net-badge" class="hidden"></div>
+  <div id="net-away" class="hidden"><span class="dot"></span><span class="net-away-msg">Opponent reconnecting…</span><button id="net-away-leave" type="button">LEAVE</button></div>
+  <button id="sound-btn" type="button" aria-label="Mute sound">🔊</button>
+  <div id="rotate"><div class="phone-icon">📱</div>Rotate your phone sideways to enter the Dakshin Arena</div>
+  <div id="ios-swipe" class="hidden">
+    <div class="swipe-hand">👆</div>
+    <div>Swipe up to go fullscreen</div>
+    <button class="swipe-skip" type="button">Skip</button>
+  </div>
+
+  <script type="module" src="/assets/main-C7-oASSx.js?v=20261129"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+node_modules/
+__pycache__/
+*.pyc
+.audio_cache/
+*.tmp
+*.audit.raw
