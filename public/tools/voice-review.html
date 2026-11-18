@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Voice Line Review</title>
+  <style>
+    :root { color-scheme: dark; --panel:#171a22; --line:#343a48; --accent:#f4b860; --good:#62c68a; --bad:#f06b74; }
+    * { box-sizing:border-box; }
+    body { margin:0; font:14px system-ui,sans-serif; background:#0d0f14; color:#eef1f7; }
+    header { position:sticky; top:0; z-index:2; display:flex; gap:12px; align-items:center; padding:12px 16px; background:#11141b; border-bottom:1px solid var(--line); }
+    h1 { margin:0; font-size:18px; }
+    #progress { margin-left:auto; min-width:220px; height:8px; }
+    main { display:grid; grid-template-columns:230px minmax(300px,1fr); height:calc(100vh - 58px); }
+    aside { overflow:auto; border-right:1px solid var(--line); padding:10px; }
+    #list { overflow:auto; padding:16px; }
+    .fighter { width:100%; margin:3px 0; padding:9px; text-align:left; border:1px solid transparent; border-radius:6px; background:transparent; color:inherit; cursor:pointer; }
+    .fighter.active { border-color:var(--accent); background:#22252e; }
+    .card { max-width:900px; margin:auto; padding:18px; border:1px solid var(--line); border-radius:10px; background:var(--panel); }
+    .meta { display:flex; gap:14px; flex-wrap:wrap; color:#abb2c0; }
+    .score.bad { color:var(--bad); }
+    .score.good { color:var(--good); }
+    textarea { width:100%; min-height:96px; resize:vertical; margin:14px 0; padding:10px; border:1px solid var(--line); border-radius:6px; background:#0f1117; color:inherit; }
+    .controls { display:flex; gap:8px; flex-wrap:wrap; }
+    button, select { border:1px solid var(--line); border-radius:6px; background:#232733; color:inherit; padding:8px 10px; cursor:pointer; }
+    button.primary { border-color:var(--accent); background:#3a3020; }
+    button.approved { border-color:var(--good); background:#183424; }
+    button.rejected { border-color:var(--bad); background:#402126; }
+    .nav { margin-left:auto; }
+    #status { min-height:20px; color:#abb2c0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Voice Line Review</h1>
+    <label>Filter <select id="filter"><option value="all">All</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="low">Low scores</option></select></label>
+    <progress id="progress" value="0" max="1"></progress>
+    <button id="save">Save all</button>
+  </header>
+  <main>
+    <aside id="fighters"></aside>
+    <section id="list"></section>
+  </main>
+  <script>
+    let data = {};
+    let flat = [];
+    let index = 0;
+    let fighter = "";
+    const $ = (id) => document.getElementById(id);
+
+    function entries() {
+      const filter = $("filter").value;
+      flat = [];
+      for (const [fid, lines] of Object.entries(data)) {
+        for (const [lid, line] of Object.entries(lines)) {
+          let include = filter === "all";
+          if (filter === "pending") include = line.approved === false;
+          if (filter === "approved") include = line.approved === true;
+          if (filter === "rejected") include = line.approved === false && line.reviewStatus === "rejected";
+          if (filter === "low") include = (line.matchScore || 0) < 0.75 || (line.speakerScore || 0) < 0.70;
+          if (include) flat.push({ fid, lid, line });
+        }
+      }
+      if (fighter) flat = flat.filter(item => item.fid === fighter);
+      index = Math.max(0, Math.min(index, flat.length - 1));
+    }
+
+    function progress() {
+      let total = 0, approved = 0;
+      for (const lines of Object.values(data)) for (const line of Object.values(lines)) {
+        total++;
+        if (line.approved) approved++;
+      }
+      $("progress").value = total ? approved / total : 0;
+      $("progress").title = `${approved}/${total} approved`;
+    }
+
+    function renderFighters() {
+      $("fighters").innerHTML = "";
+      for (const fid of Object.keys(data)) {
+        const b = document.createElement("button");
+        b.className = "fighter" + (fid === fighter ? " active" : "");
+        b.textContent = fid;
+        b.onclick = () => { fighter = fighter === fid ? "" : fid; index = 0; renderFighters(); render(); };
+        $("fighters").appendChild(b);
+      }
+    }
+
+    function render() {
+      entries();
+      progress();
+      if (!flat.length) {
+        $("list").innerHTML = '<div class="card">No matching voice lines.</div>';
+        return;
+      }
+      const item = flat[index];
+      const match = item.line.matchScore ?? 0;
+      const speaker = item.line.speakerScore ?? 0;
+      $("list").innerHTML = `
+        <article class="card">
+          <h2>${item.fid} / ${item.lid}</h2>
+          <div class="meta">
+            <span>Source: ${item.line.source || item.line.audio}</span>
+            <span class="score ${match < 0.75 ? "bad" : "good"}">Match ${match.toFixed(2)}</span>
+            <span class="score ${speaker < 0.70 ? "bad" : "good"}">Speaker ${speaker.toFixed(2)}</span>
+            <span>${index + 1}/${flat.length}</span>
+          </div>
+          <audio id="player" controls src="${item.line.audio}"></audio>
+          <label>Target text<textarea id="text">${escapeHtml(item.line.text || "")}</textarea></label>
+          <label>Whisper text<textarea id="whisper" readonly>${escapeHtml(item.line.whisperText || "")}</textarea></label>
+          <div class="controls">
+            <button id="play" class="primary">Play</button>
+            <button id="approve" class="${item.line.approved ? "approved" : ""}">Approve</button>
+            <button id="reject" class="${item.line.reviewStatus === "rejected" ? "rejected" : ""}">Reject</button>
+            <div class="nav">
+              <button id="prev">Previous</button>
+              <button id="next">Next</button>
+            </div>
+          </div>
+          <div id="status"></div>
+        </article>`;
+      $("text").oninput = (event) => { item.line.text = event.target.value; };
+      $("play").onclick = () => $("player").play();
+      $("approve").onclick = () => { item.line.approved = true; item.line.reviewStatus = "approved"; render(); };
+      $("reject").onclick = () => { item.line.approved = false; item.line.reviewStatus = "rejected"; render(); };
+      $("prev").onclick = () => { index = (index - 1 + flat.length) % flat.length; render(); };
+      $("next").onclick = () => { index = (index + 1) % flat.length; render(); };
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" })[c]);
+    }
+
+    async function save() {
+      $("status").textContent = "Saving...";
+      const response = await fetch("/api/voice-lines", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) {
+        $("status").textContent = `Save failed: ${await response.text()}`;
+        return;
+      }
+      $("status").textContent = "Saved.";
+      progress();
+    }
+
+    async function init() {
+      const response = await fetch("/api/voice-lines");
+      if (!response.ok) throw new Error(await response.text());
+      data = await response.json();
+      renderFighters();
+      render();
+    }
+
+    $("save").onclick = save;
+    $("filter").onchange = () => { index = 0; render(); };
+    init().catch(error => { $("list").innerHTML = `<div class="card">${escapeHtml(error.message)}</div>`; });
+  </script>
+</body>
+</html>

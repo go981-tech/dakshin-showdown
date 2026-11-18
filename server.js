@@ -89,6 +89,42 @@ function readJsonBody(req) {
   });
 }
 
+function readRawJsonBody(req) {
+  return new Promise((resolve) => {
+    const chunks = [];
+    req.on("data", (c) => chunks.push(c));
+    req.on("end", () => {
+      try {
+        resolve({ ok: true, value: JSON.parse(Buffer.concat(chunks).toString("utf8") || "null") });
+      } catch {
+        resolve({ ok: false, value: null });
+      }
+    });
+  });
+}
+
+function validateVoiceLines(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  for (const [fighter, lines] of Object.entries(value)) {
+    if (!fighter || !lines || typeof lines !== "object" || Array.isArray(lines)) return false;
+    for (const [lineId, line] of Object.entries(lines)) {
+      if (!lineId || !line || typeof line !== "object" || Array.isArray(line)) return false;
+      if (typeof line.text !== "string" || typeof line.audio !== "string") return false;
+      if (typeof line.approved !== "boolean") return false;
+      if ("matchScore" in line && (typeof line.matchScore !== "number" || !Number.isFinite(line.matchScore))) return false;
+      if ("speakerScore" in line && (typeof line.speakerScore !== "number" || !Number.isFinite(line.speakerScore))) return false;
+    }
+  }
+  return true;
+}
+
+function writeVoiceLinesAtomically(value) {
+  const file = path.join(PUBLIC_DIR, "assets", "voice-lines.json");
+  const tmp = `${file}.${process.pid}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(value, null, 2) + "\n", "utf8");
+  fs.renameSync(tmp, file);
+}
+
 function serveStatic(req, res, pathname) {
   let cleanPath;
   try {
@@ -142,6 +178,32 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname === "/api/ice") {
     return sendJson(res, 200, ICE_PAYLOAD);
+  }
+
+  if (pathname === "/api/voice-lines") {
+    const devOnly = process.env.NODE_ENV !== "production";
+    if (!devOnly) return sendJson(res, 404, { error: "Not found" });
+    const file = path.join(PUBLIC_DIR, "assets", "voice-lines.json");
+    if (req.method === "GET") {
+      try {
+        return sendJson(res, 200, JSON.parse(fs.readFileSync(file, "utf8")));
+      } catch {
+        return sendJson(res, 500, { error: "Could not read voice lines" });
+      }
+    }
+    if (req.method === "POST") {
+      const parsed = await readRawJsonBody(req);
+      if (!parsed.ok) return sendJson(res, 400, { error: "Invalid JSON" });
+      if (!validateVoiceLines(parsed.value)) return sendJson(res, 400, { error: "Invalid voice-lines structure" });
+      try {
+        writeVoiceLinesAtomically(parsed.value);
+        return sendJson(res, 200, { ok: true });
+      } catch {
+        return sendJson(res, 500, { error: "Could not save voice lines" });
+      }
+    }
+    res.writeHead(405, { "Allow": "GET, POST" });
+    return res.end();
   }
 
   if (pathname === "/api/room/close" && req.method === "POST") {
