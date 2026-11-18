@@ -1,8 +1,9 @@
+import argparse
 import json
 import os
 import re
 
-OUT_DIR = r"C:\Users\Gowtham S\.gemini\antigravity\brain\0f866747-1d70-4d27-a017-db04ac05b826\browser_sandbox\outputs"
+OUT_DIR = os.environ.get("DAKSHIN_RECONSTRUCT_DIR", "")
 DEST_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "public", "assets")
 os.makedirs(DEST_DIR, exist_ok=True)
 
@@ -200,6 +201,12 @@ def reconstruct_main():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Reconstruct bundled assets from browser snapshot outputs.")
+    parser.add_argument("--out-dir", default=OUT_DIR, help="Path to captured browser_sandbox/outputs directory (or set DAKSHIN_RECONSTRUCT_DIR)")
+    args = parser.parse_args()
+    if not args.out_dir or not os.path.isdir(args.out_dir):
+        raise SystemExit("Provide a valid --out-dir or set DAKSHIN_RECONSTRUCT_DIR")
+    OUT_DIR = os.path.abspath(args.out_dir)
     reconstruct_css()
     reconstruct_rooms()
     reconstruct_main()

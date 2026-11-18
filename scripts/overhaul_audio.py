@@ -7,6 +7,7 @@ Overhauls all game audio in public/assets/:
   4. Real downloaded SFX + studio-filtered 44.1kHz stereo synth SFX/beds with zero 15KB/28KB placeholder WAVs
 """
 
+import argparse
 import asyncio
 import math
 import os
@@ -28,10 +29,21 @@ ASSETS = os.path.join(ROOT, "public", "assets")
 MEMES = os.path.join(ASSETS, "memes")
 SFX_DIR = os.path.join(ASSETS, "sfx")
 VOICE_DIR = os.path.join(ASSETS, "voice")
-CACHE_DIR = os.path.join(
-    os.path.expanduser("~"),
-    ".gemini", "antigravity", "brain", "9258c89c-bb01-401d-ac65-d60bc4045af8", "scratch", "audio_cache"
-)
+
+def _resolve_cache_dir():
+    p = argparse.ArgumentParser(add_help=False)
+    p.add_argument("--cache-dir", default=None)
+    known, _ = p.parse_known_args()
+    if known.cache_dir:
+        return os.path.abspath(known.cache_dir)
+    if os.environ.get("DAKSHIN_AUDIO_CACHE"):
+        return os.path.abspath(os.environ["DAKSHIN_AUDIO_CACHE"])
+    local_cache = os.path.join(ROOT, ".audio_cache")
+    if os.path.isdir(local_cache):
+        return local_cache
+    return os.path.join(tempfile.gettempdir(), "dakshin_audio_cache")
+
+CACHE_DIR = _resolve_cache_dir()
 
 os.makedirs(MEMES, exist_ok=True)
 os.makedirs(SFX_DIR, exist_ok=True)
