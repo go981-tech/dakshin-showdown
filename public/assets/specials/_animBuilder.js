@@ -145,7 +145,7 @@ export function buildCharacterClip(scene, nameOrOptions, maybeDuration, maybeFra
       quats[offset + 2] = targetQuat.z;
       quats[offset + 3] = targetQuat.w;
     }
-    const track = new QuaternionKeyframeTrack(`${boneName}.quaternion`, times, quats);
+    const track = new QuaternionKeyframeTrack(`${rest.bone.name}.quaternion`, times, quats);
     track.setInterpolation(InterpolateSmooth);
     tracks.push(track);
   }
@@ -173,7 +173,7 @@ export function buildCharacterClip(scene, nameOrOptions, maybeDuration, maybeFra
       positions[i * 3 + 1] = rest.position.y + beforeOffset[1] + (afterOffset[1] - beforeOffset[1]) * smoothT;
       positions[i * 3 + 2] = rest.position.z + beforeOffset[2] + (afterOffset[2] - beforeOffset[2]) * smoothT;
     }
-    const track = new VectorKeyframeTrack("Hips.position", times, positions);
+    const track = new VectorKeyframeTrack(`${rest.bone.name}.position`, times, positions);
     track.setInterpolation(InterpolateSmooth);
     tracks.push(track);
   }
