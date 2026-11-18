@@ -18,6 +18,8 @@ let logs = [];
 let events = [];
 let showcaseActionTimers = [];
 let showcaseActions = [];
+let showcaseGuardTimer = null;
+let showcaseState = null;
 
 function loadVoiceLines() {
   if (!voiceLinesPromise) {
@@ -155,6 +157,9 @@ function recordDialogue(payload) {
   const speakerScore = typeof entry.speakerScore === "number"
     ? entry.speakerScore
     : fighterId && payload.expectedFighterId ? (fighterId === payload.expectedFighterId ? 1 : 0) : 1;
+  const initialDurationMs = Number(payload.durationMs) > 0
+    ? payload.durationMs
+    : SUBTITLE_DURATION_MS;
   activeSync = {
     lineId: payload.lineId,
     priority: payload.priority,
@@ -162,11 +167,11 @@ function recordDialogue(payload) {
     matchScore,
     speakerScore,
     subtitleStartMs: now,
-    subtitleEndMs: now + SUBTITLE_DURATION_MS,
-    subtitleDurationMs: SUBTITLE_DURATION_MS,
+    subtitleEndMs: now + initialDurationMs,
+    subtitleDurationMs: initialDurationMs,
     audioStartMs: now,
-    audioEndMs: null,
-    audioDurationMs: null,
+    audioEndMs: now + initialDurationMs,
+    audioDurationMs: initialDurationMs,
     dropped: false,
     audioUrl: entry.audio || null
   };
@@ -183,9 +188,8 @@ function recordDialogue(payload) {
       const durationMs = audio.duration * 1000;
       activeSync.audioDurationMs = durationMs;
       activeSync.audioEndMs = activeSync.audioStartMs + durationMs;
-      if (Math.abs(SUBTITLE_DURATION_MS - durationMs) > 200) {
-        addLog("error", `Subtitle/audio mismatch: ${Math.round(Math.abs(SUBTITLE_DURATION_MS - durationMs))}ms on ${payload.lineId}`);
-      }
+      activeSync.subtitleDurationMs = durationMs;
+      activeSync.subtitleEndMs = activeSync.subtitleStartMs + durationMs;
       renderOverlay();
     }, { once: true });
     audio.addEventListener("error", () => {
@@ -200,7 +204,11 @@ function findBattle() {
 }
 
 function findMixerAndScene(battle) {
-  const scene = battle?.ctx?.scene || battle?.ctx?.arena?.group || null;
+  const scene = battle?.ctx?.scene
+    || battle?.ctx?.arena?.group
+    || battle?.arena?.scene
+    || battle?.ctx?.scene?.parent
+    || null;
   const fighters = battle?.fighters || [];
   for (const fighter of fighters) {
     const candidates = [
@@ -248,15 +256,70 @@ async function verifySpecialAudio(battle, fighterId, slot) {
   const lines = await loadVoiceLines();
   const entry = lines?.[fighterId]?.[slot];
   if (!entry?.audio) {
-    addLog("warning", `Missing voice audio: ${fighterId}/${slot}`);
-    return;
+    addLog("warning", `Missing voice line: ${fighterId}/${slot}`);
+    return false;
   }
   try {
-    const response = await fetch(entry.audio, { method: "HEAD" });
-    if (!response.ok) addLog("error", `Audio HTTP ${response.status}: ${entry.audio}`);
+    const response = await fetch(entry.audio, { method: "HEAD", cache: "no-store" });
+    if (!response.ok) {
+      addLog("error", `Audio HTTP ${response.status}: ${entry.audio}`);
+      return false;
+    }
+    return true;
   } catch (error) {
     addLog("error", `Audio failure: ${entry.audio}`, error.message);
+    return false;
   }
+}
+
+async function ensureShowcaseClips(scene) {
+  if (!scene) return;
+  try {
+    const { buildClips } = await import("./specials/index.js");
+    const clips = buildClips(scene);
+    scene.userData = scene.userData || {};
+    scene.userData.southSpecialClips = scene.userData.southSpecialClips || {};
+    for (const clip of clips) scene.userData.southSpecialClips[clip.name] = clip;
+  } catch (error) {
+    addLog("error", "Special clip registration failed", error.message);
+  }
+}
+
+function beginShowcaseGuard(battle) {
+  showcaseState = {
+    timer: battle?.match?.timer,
+    wins: battle?.match?.wins ? [...battle.match.wins] : null,
+    history: battle?.match?.history ? [...battle.match.history] : null,
+    phase: battle?.phase
+  };
+  showcaseGuardTimer = window.setInterval(() => {
+    if (!showcaseRunning) return;
+    if (battle) {
+      battle.timeUp = false;
+      if (battle.match && battle.match.timer != null) battle.match.timer = 60;
+      if (battle.match?.wins) battle.match.wins = [0, 0];
+      if (battle.match?.history) battle.match.history = [];
+      if (["ko", "roundOver", "matchOver", "done", "entrance"].includes(battle.phase) && battle.setPhase) {
+        battle.setPhase("fight");
+      }
+      for (const fighter of battle.fighters || []) {
+        if (fighter?.hp != null && fighter?.maxHp != null && fighter.hp <= 0) {
+          fighter.hp = fighter.maxHp;
+        }
+      }
+    }
+  }, 250);
+}
+
+function endShowcaseGuard(battle) {
+  if (showcaseGuardTimer) window.clearInterval(showcaseGuardTimer);
+  showcaseGuardTimer = null;
+  if (battle && showcaseState) {
+    if (battle.match && showcaseState.timer != null) battle.match.timer = showcaseState.timer;
+    if (battle.match && showcaseState.wins) battle.match.wins = showcaseState.wins;
+    if (battle.match && showcaseState.history) battle.match.history = showcaseState.history;
+  }
+  showcaseState = null;
 }
 
 async function runShowcase() {
@@ -276,6 +339,8 @@ async function runShowcase() {
   const { mixer, scene } = findMixerAndScene(battle);
   if (!mixer) addLog("warning", "Missing clipAction mixer on active battle");
   ensureOverlay();
+  await ensureShowcaseClips(scene);
+  beginShowcaseGuard(battle);
 
   try {
     for (const fighterId of FIGHTER_IDS) {
@@ -310,6 +375,7 @@ async function runShowcase() {
     }
   } finally {
     const wasCancelled = showcaseCancelled;
+    endShowcaseGuard(battle);
     showcaseRunning = false;
     showcaseCancelled = false;
     showcaseTimer = null;
@@ -334,6 +400,7 @@ function stopShowcase(reason = "Cancelled") {
     showcaseResolve = null;
     resolve();
   }
+  endShowcaseGuard(findBattle());
   showcaseRunning = false;
   showcaseStep = reason;
   addLog("warning", `F10 showcase ${reason.toLowerCase()}`);

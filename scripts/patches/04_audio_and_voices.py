@@ -85,3 +85,18 @@ def apply(ctx):
         'let e=+(this.playerSide===0);if(this.fighters[e].actionable){sayLine(this,e,`bark1`,{priority:1})}',
         'Remove random idle taunts and route bark1 through sayLine',
     )
+    ctx.replace_exact(
+        'speech(e,t){this.rigs[e].headWorld(this.tmp),this.tmp.y+=.45;let n=this.ctx.toScreen(this.tmp);this.ctx.hud.speech(t,n.x,n.y)}',
+        'speech(e,t,d=3000){this.rigs[e].headWorld(this.tmp),this.tmp.y+=.45;let n=this.ctx.toScreen(this.tmp);this.ctx.hud.speech(t,n.x,n.y,``,d)}',
+        'Pass approved audio duration to battle subtitles',
+    )
+    ctx.replace_exact(
+        'speech(e,t,n,r=``){let i=document.createElement(`div`);',
+        'speech(e,t,n,r=``,d=3000){let i=document.createElement(`div`);',
+        'Add HUD subtitle duration parameter',
+    )
+    ctx.replace_exact(
+        'window.setTimeout(()=>i.remove(),3e3)',
+        'window.setTimeout(()=>i.remove(),d)',
+        'Use actual approved subtitle duration',
+    )

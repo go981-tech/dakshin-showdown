@@ -1432,12 +1432,70 @@ function loadVoiceLines() {
   return _voiceLinesPromise;
 }
 
-export async function sayLine(battle, side, lineId, { priority = 1, allowUnapproved = true } = {}) {
+function fallbackApproved(entry) {
+  return !!(entry && entry.text && entry.audio && entry.approved !== false);
+}
+
+async function resolveAudioDuration(audioUrl) {
+  if (!audioUrl) return null;
+  return await new Promise((resolve) => {
+    const audio = new Audio(audioUrl);
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
+    const timeout = window.setTimeout(() => finish(null), 1600);
+    audio.preload = "metadata";
+    audio.addEventListener("loadedmetadata", () => {
+      window.clearTimeout(timeout);
+      finish(Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration * 1000 : null);
+    }, { once: true });
+    audio.addEventListener("error", () => {
+      window.clearTimeout(timeout);
+      finish(null);
+    }, { once: true });
+  });
+}
+
+async function verifyDialogueAudio(audioUrl) {
+  if (!audioUrl) return { ok: false, reason: "Missing voice audio" };
+  try {
+    const response = await fetch(audioUrl, { method: "HEAD", cache: "no-store" });
+    if (!response.ok) return { ok: false, reason: `Audio HTTP ${response.status}` };
+  } catch (error) {
+    return { ok: false, reason: error?.message || "Audio fetch failed" };
+  }
+  return { ok: true, reason: "" };
+}
+
+export async function sayLine(battle, side, lineId, { priority = 1, allowUnapproved = false } = {}) {
   if (!battle) return false;
   const lines = await loadVoiceLines();
   const fighter = battle.fighters?.[resolveDialogueSide(battle, side)];
   const fighterId = fighter?.char?.id;
-  const entry = lines?.[fighterId]?.[lineId];
+  const fallbackIds = {
+    finisher: ["super", "special2", "special1"],
+    super: ["special1", "intro", "bark1"],
+    special2: ["special1", "intro", "bark2"],
+    win: ["bark2", "special2", "intro"],
+    bark1: ["intro", "special1", "bark1"],
+    bark2: ["special2", "intro", "bark1"],
+    intro: ["special1", "bark1"]
+  };
+  let entry = lines?.[fighterId]?.[lineId];
+  let resolvedLineId = lineId;
+  if (!fallbackApproved(entry)) {
+    for (const fallbackId of fallbackIds[lineId] || []) {
+      const fallback = lines?.[fighterId]?.[fallbackId];
+      if (fallbackApproved(fallback)) {
+        entry = fallback;
+        resolvedLineId = fallbackId;
+        break;
+      }
+    }
+  }
   if (!entry?.text) {
     window.__southDebug?.recordDropped?.({ lineId, priority, approved: false, reason: "Missing line" });
     return false;
@@ -1446,6 +1504,18 @@ export async function sayLine(battle, side, lineId, { priority = 1, allowUnappro
     window.__southDebug?.recordDropped?.({ lineId, priority, approved: false, reason: "Unapproved line" });
     return false;
   }
+  const audioCheck = await verifyDialogueAudio(entry.audio);
+  if (!audioCheck.ok) {
+    window.__southDebug?.recordDropped?.({
+      lineId: resolvedLineId === lineId ? lineId : `${lineId}->${resolvedLineId}`,
+      priority,
+      approved: entry.approved !== false,
+      reason: audioCheck.reason
+    });
+    window.__southDebug?.addLog?.("error", `Audio failed: ${entry.audio || fighterId || "unknown"}`, audioCheck.reason);
+    return false;
+  }
+  const durationMs = await resolveAudioDuration(entry.audio);
 
   const numericSide = resolveDialogueSide(battle, side);
   const now = performance.now();
@@ -1459,37 +1529,43 @@ export async function sayLine(battle, side, lineId, { priority = 1, allowUnappro
     return false;
   }
 
+  const audio = battle.ctx?.audio;
+  if (!entry.audio || !audio || audio.muted || typeof audio.playClip !== "function") {
+    const reason = audio?.muted ? "Battle audio muted" : "Dialogue audio unavailable";
+    window.__southDebug?.recordDropped?.({ lineId: resolvedLineId, priority, approved: entry.approved !== false, reason });
+    window.__southDebug?.addLog?.("error", `Audio failed: ${entry.audio || fighterId || "unknown"}`, reason);
+    return false;
+  }
+  try {
+    await Promise.resolve(audio.playClip(entry.audio, 0.95));
+  } catch (error) {
+    console.error("Dialogue audio failed:", error);
+    window.__southDebug?.recordDropped?.({ lineId: resolvedLineId, priority, approved: entry.approved !== false, reason: "Audio playback failed" });
+    window.__southDebug?.addLog?.("error", `Audio failed: ${entry.audio}`, error.message);
+    return false;
+  }
+
   _activeVoiceLines.set(numericSide, {
     lineId,
     priority,
-    expiresAt: now + 3000
+    expiresAt: now + (durationMs || 3000)
   });
 
   try {
-    battle.speech(numericSide, entry.text);
+    battle.speech(numericSide, entry.text, durationMs || 3000);
   } catch (error) {
     console.error("Dialogue subtitle failed:", error);
-  }
-
-  const audio = battle.ctx?.audio;
-  if (entry.audio && audio && !audio.muted) {
-    try {
-      if (typeof audio.playClip !== "function") {
-        throw new Error("battle audio has no playClip API");
-      }
-      audio.playClip(entry.audio, 0.95);
-    } catch (error) {
-      console.error("Dialogue audio failed:", error);
-      window.__southDebug?.addLog?.("error", `Audio failed: ${entry.audio}`, error.message);
-    }
+    window.__southDebug?.recordDropped?.({ lineId: resolvedLineId, priority, approved: entry.approved !== false, reason: "Subtitle failed" });
+    return false;
   }
   window.__southDebug?.recordDialogue?.({
-    lineId,
+    lineId: resolvedLineId === lineId ? lineId : `${lineId}->${resolvedLineId}`,
     priority,
     fighterId,
     expectedFighterId: fighterId,
     text: entry.text,
-    entry
+    entry,
+    durationMs
   });
   return true;
 }
