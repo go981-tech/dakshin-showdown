@@ -1,0 +1,119 @@
+{
+  "modi": {
+    "intro": {"text": "Tamilnattu arasin mudhalamaicharaga...", "audio": "/assets/memes/modi_1.mp3", "approved": true},
+    "special1": {"text": "Tamilnattu arasin mudhalamaicharaga...", "audio": "/assets/memes/modi_1.mp3", "approved": true},
+    "special2": {"text": "Nermaiyaga seyven endrum urudhi mozhigiren!", "audio": "/assets/memes/modi_2.mp3", "approved": true},
+    "super": {"text": "Tamilnattu arasin mudhalamaicharaga!", "audio": "/assets/modi-R8FpxZEb.mp3", "approved": true},
+    "win": {"text": "Nermaiyaga seyven endrum urudhi mozhigiren!", "audio": "/assets/memes/modi_2.mp3", "approved": true},
+    "bark1": {"text": "Tamilnattu arasin mudhalamaicharaga...", "audio": "/assets/memes/modi_1.mp3", "approved": true},
+    "bark2": {"text": "Nermaiyaga seyven endrum urudhi mozhigiren!", "audio": "/assets/memes/modi_2.mp3", "approved": true}
+  },
+  "rahul": {
+    "intro": {"text": "What bro? It's very wrong bro!", "audio": "/assets/memes/rahul_1.mp3", "approved": true},
+    "special1": {"text": "What bro? It's very wrong bro!", "audio": "/assets/memes/rahul_1.mp3", "approved": true},
+    "special2": {"text": "En nenjil kudiyirukkum...", "audio": "/assets/memes/rahul_2.mp3", "approved": true},
+    "super": {"text": "What bro! It's very wrong bro!", "audio": "/assets/rahul-C7Jjp4hs.mp3", "approved": true},
+    "win": {"text": "En nenjil kudiyirukkum...", "audio": "/assets/memes/rahul_2.mp3", "approved": true},
+    "bark1": {"text": "What bro? It's very wrong bro!", "audio": "/assets/memes/rahul_1.mp3", "approved": true},
+    "bark2": {"text": "En nenjil kudiyirukkum...", "audio": "/assets/memes/rahul_2.mp3", "approved": true}
+  },
+  "didi": {
+    "intro": {"text": "Unmaiyana makkal iyakkam!", "audio": "/assets/memes/didi_1.mp3", "approved": true},
+    "special1": {"text": "Unmaiyana makkal iyakkam!", "audio": "/assets/memes/didi_1.mp3", "approved": true},
+    "special2": {"text": "Naan irukkindra varai, enakkup pinnalum!", "audio": "/assets/memes/didi_2.mp3", "approved": true},
+    "super": {"text": "Naan Ninaithal...!", "audio": "/assets/didi-CjTHLKgc.mp3", "approved": true},
+    "win": {"text": "Naan irukkindra varai, enakkup pinnalum!", "audio": "/assets/memes/didi_2.mp3", "approved": true},
+    "bark1": {"text": "Unmaiyana makkal iyakkam!", "audio": "/assets/memes/didi_1.mp3", "approved": true},
+    "bark2": {"text": "Naan irukkindra varai, enakkup pinnalum!", "audio": "/assets/memes/didi_2.mp3", "approved": true}
+  },
+  "trump": {
+    "intro": {"text": "Pushpa Pushparaj... Thaggedhe Le!", "audio": "/assets/memes/trump_1.mp3", "approved": true},
+    "special1": {"text": "Pushpa Pushparaj... Thaggedhe Le!", "audio": "/assets/memes/trump_1.mp3", "approved": true},
+    "special2": {"text": "Pushpa ante flower-a? Fireuu!", "audio": "/assets/memes/trump_2.mp3", "approved": true},
+    "super": {"text": "Pushpa ante flower anukunnava? FIRE!", "audio": "/assets/trump-Czs6_rQc.mp3", "approved": true},
+    "win": {"text": "Pushpa ante flower-a? Fireuu!", "audio": "/assets/memes/trump_2.mp3", "approved": true},
+    "bark1": {"text": "Pushpa Pushparaj... Thaggedhe Le!", "audio": "/assets/memes/trump_1.mp3", "approved": true},
+    "bark2": {"text": "Pushpa ante flower-a? Fireuu!", "audio": "/assets/memes/trump_2.mp3", "approved": true}
+  },
+  "yogi": {
+    "intro": {"text": "Mukhyamantri kaserayil aakam!", "audio": "/assets/memes/yogi_1.mp3", "approved": true},
+    "special1": {"text": "Mukhyamantri kaserayil aakam!", "audio": "/assets/memes/yogi_1.mp3", "approved": true},
+    "special2": {"text": "Entho undakki kalayam ennanaanu vicharikunnathu!", "audio": "/assets/memes/yogi_2.mp3", "approved": true},
+    "super": {"text": "Kadakku Purathu!", "audio": "/assets/yogi-CJEN4Csa.mp3", "approved": true},
+    "win": {"text": "Entho undakki kalayam ennanaanu vicharikunnathu!", "audio": "/assets/memes/yogi_2.mp3", "approved": true},
+    "bark1": {"text": "Mukhyamantri kaserayil aakam!", "audio": "/assets/memes/yogi_1.mp3", "approved": true},
+    "bark2": {"text": "Entho undakki kalayam ennanaanu vicharikunnathu!", "audio": "/assets/memes/yogi_2.mp3", "approved": true}
+  },
+  "nitin": {
+    "intro": {"text": "One thing I'd like to tell you — my birthday...", "audio": "/assets/memes/nitin_1.mp3", "approved": true},
+    "special1": {"text": "One thing I'd like to tell you — my birthday...", "audio": "/assets/memes/nitin_1.mp3", "approved": true},
+    "special2": {"text": "By profession I'm a businessman!", "audio": "/assets/memes/nitin_2.mp3", "approved": true},
+    "super": {"text": "Kanakapura Bande!", "audio": "/assets/nitin-B2ZG9HV5.mp3", "approved": true},
+    "win": {"text": "By profession I'm a businessman!", "audio": "/assets/memes/nitin_2.mp3", "approved": true},
+    "bark1": {"text": "One thing I'd like to tell you — my birthday...", "audio": "/assets/memes/nitin_1.mp3", "approved": true},
+    "bark2": {"text": "By profession I'm a businessman!", "audio": "/assets/memes/nitin_2.mp3", "approved": true}
+  },
+  "ravi": {
+    "intro": {"text": "Naaku konchem thikka undhi, kaani daniko lekka undhi!", "audio": "/assets/memes/ravi_1.mp3", "approved": true},
+    "special1": {"text": "Naaku konchem thikka undhi, kaani daniko lekka undhi!", "audio": "/assets/memes/ravi_1.mp3", "approved": true},
+    "special2": {"text": "Janamlo unta! Janam la unta!", "audio": "/assets/memes/ravi_2.mp3", "approved": true},
+    "super": {"text": "Seize the Ship!", "audio": "/assets/ravi-BUhOMgaW.mp3", "approved": true},
+    "win": {"text": "Janamlo unta! Janam la unta!", "audio": "/assets/raviwin-Q4j69frZ.mp3", "approved": true},
+    "bark1": {"text": "Naaku konchem thikka undhi, kaani daniko lekka undhi!", "audio": "/assets/memes/ravi_1.mp3", "approved": true},
+    "bark2": {"text": "Janamlo unta! Janam la unta!", "audio": "/assets/memes/ravi_2.mp3", "approved": true}
+  },
+  "lalu": {
+    "intro": {"text": "Moondru yaanaigal uyirizhundhirukkindranar!", "audio": "/assets/memes/lalu_1.mp3", "approved": true},
+    "special1": {"text": "Moondru yaanaigal uyirizhundhirukkindranar!", "audio": "/assets/memes/lalu_1.mp3", "approved": true},
+    "special2": {"text": "1500 yaanai irundhuchu... ippa 650 thaan!", "audio": "/assets/memes/lalu_2.mp3", "approved": true},
+    "super": {"text": "Oru thadava saappittu 27,000 vidhaigal vidhaikkudhu!", "audio": "/assets/lalu-vVsgGZuo.mp3", "approved": true},
+    "win": {"text": "1500 yaanai irundhuchu... ippa 650 thaan!", "audio": "/assets/memes/lalu_2.mp3", "approved": true},
+    "bark1": {"text": "Moondru yaanaigal uyirizhundhirukkindranar!", "audio": "/assets/memes/lalu_1.mp3", "approved": true},
+    "bark2": {"text": "1500 yaanai irundhuchu... ippa 650 thaan!", "audio": "/assets/memes/lalu_2.mp3", "approved": true}
+  },
+  "mbapu": {
+    "intro": {"text": "Kadavul kitta undiyal vekkiringale — adhu Aathigam!", "audio": "/assets/memes/mbapu_1.mp3", "approved": true},
+    "special1": {"text": "Kadavul kitta undiyal vekkiringale — adhu Aathigam!", "audio": "/assets/memes/mbapu_1.mp3", "approved": true},
+    "special2": {"text": "Nambamal poottu podringle — adhu thaan Naathigam!", "audio": "/assets/memes/mbapu_2.mp3", "approved": true},
+    "super": {"text": "Nambamal poottu podringle — adhu thaan Naathigam!", "audio": "/assets/mbapu-D85PVY1T.mp3", "approved": true},
+    "win": {"text": "Nambamal poottu podringle — adhu thaan Naathigam!", "audio": "/assets/memes/mbapu_2.mp3", "approved": true},
+    "bark1": {"text": "Kadavul kitta undiyal vekkiringale — adhu Aathigam!", "audio": "/assets/memes/mbapu_1.mp3", "approved": true},
+    "bark2": {"text": "Nambamal poottu podringle — adhu thaan Naathigam!", "audio": "/assets/memes/mbapu_2.mp3", "approved": true}
+  },
+  "amit": {
+    "intro": {"text": "Adhukkellam bayappadathinga! Naalaiku onnume illaina...", "audio": "/assets/memes/amit_1.mp3", "approved": true},
+    "special1": {"text": "Adhukkellam bayappadathinga! Naalaiku onnume illaina...", "audio": "/assets/memes/amit_1.mp3", "approved": true},
+    "special2": {"text": "Ellathaiyum paathutten! Ellathaiyum paathachu!", "audio": "/assets/memes/amit_2.mp3", "approved": true},
+    "super": {"text": "Ellathaiyum paathutten! Ellathaiyum paathachu!", "audio": "/assets/amit-DJ24Mt8b.mp3", "approved": true},
+    "win": {"text": "Ellathaiyum paathutten! Ellathaiyum paathachu!", "audio": "/assets/amitwin-DIIUm105.mp3", "approved": true},
+    "bark1": {"text": "Adhukkellam bayappadathinga! Naalaiku onnume illaina...", "audio": "/assets/memes/amit_1.mp3", "approved": true},
+    "bark2": {"text": "Ellathaiyum paathutten! Ellathaiyum paathachu!", "audio": "/assets/memes/amit_2.mp3", "approved": true}
+  },
+  "dhruv": {
+    "intro": {"text": "Hello everyone, naan Madan Gowri! Hello my dear MG Squad!", "audio": "/assets/memes/dhruv_1.mp3", "approved": true},
+    "special1": {"text": "Hello everyone, naan Madan Gowri! Hello my dear MG Squad!", "audio": "/assets/memes/dhruv_1.mp3", "approved": true},
+    "special2": {"text": "Indha video motivational video-va illa inspirational-a...", "audio": "/assets/memes/dhruv_2.mp3", "approved": true},
+    "super": {"text": "Hello everyone, naan Madan Gowri!", "audio": "/assets/dhruv-CHzIxkIz.mp3", "approved": true},
+    "win": {"text": "Indha video motivational video-va illa inspirational-a...", "audio": "/assets/memes/dhruv_2.mp3", "approved": true},
+    "bark1": {"text": "Hello everyone, naan Madan Gowri! Hello my dear MG Squad!", "audio": "/assets/memes/dhruv_1.mp3", "approved": true},
+    "bark2": {"text": "Indha video motivational video-va illa inspirational-a...", "audio": "/assets/memes/dhruv_2.mp3", "approved": true}
+  },
+  "nirmala": {
+    "intro": {"text": "Waise parivar se aati hoon jahan onion rakhte hi nahi!", "audio": "/assets/memes/nirmala_1.mp3", "approved": true},
+    "special1": {"text": "Waise parivar se aati hoon jahan onion rakhte hi nahi!", "audio": "/assets/memes/nirmala_1.mp3", "approved": true},
+    "special2": {"text": "Social media: popcorn ke upar bhi daal rahe hain tax!", "audio": "/assets/memes/nirmala_2.mp3", "approved": true},
+    "super": {"text": "Popcorn-ukkum 18% GST!", "audio": "/assets/nirmala-Dq7cz8UN.mp3", "approved": true},
+    "win": {"text": "Social media: popcorn ke upar bhi daal rahe hain tax!", "audio": "/assets/memes/nirmala_2.mp3", "approved": true},
+    "bark1": {"text": "Waise parivar se aati hoon jahan onion rakhte hi nahi!", "audio": "/assets/memes/nirmala_1.mp3", "approved": true},
+    "bark2": {"text": "Social media: popcorn ke upar bhi daal rahe hain tax!", "audio": "/assets/memes/nirmala_2.mp3", "approved": true}
+  },
+  "rangaraj": {
+    "intro": {"text": "Edhirkatchi thalaivarum pradhanarum pesittu iruppanga!", "audio": "/assets/memes/rangaraj_1.mp3", "approved": true},
+    "special1": {"text": "Edhirkatchi thalaivarum pradhanarum pesittu iruppanga!", "audio": "/assets/memes/rangaraj_1.mp3", "approved": true},
+    "special2": {"text": "Irandaavadhu point vandhu — Bharat Pradhanam!", "audio": "/assets/memes/rangaraj_2.mp3", "approved": true},
+    "super": {"text": "Dhairiyam purusha latchanam!", "audio": "/assets/rangaraj-super.mp3", "approved": true},
+    "win": {"text": "Irandaavadhu point vandhu — Bharat Pradhanam!", "audio": "/assets/memes/rangaraj_2.mp3", "approved": true},
+    "bark1": {"text": "Edhirkatchi thalaivarum pradhanarum pesittu iruppanga!", "audio": "/assets/memes/rangaraj_1.mp3", "approved": true},
+    "bark2": {"text": "Irandaavadhu point vandhu — Bharat Pradhanam!", "audio": "/assets/memes/rangaraj_2.mp3", "approved": true}
+  }
+}

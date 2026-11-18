@@ -32,16 +32,56 @@ def apply(ctx):
     )
     ctx.replace_exact(
         'this.cue(`a`,.5,()=>this.speech(0,this.diwali?It(n.char.id,`intro`,n.char.introLine):n.char.introLine)),this.cue(`b`,this.introLength/2+.1,()=>this.speech(1,this.diwali?It(r.char.id,`intro`,r.char.introLine):r.char.introLine))',
-        'this.cue(`a`,.5,()=>{this.speech(0,n.char.introLine),t.playClip(`/assets/memes/${n.char.id}_1.mp3`,.95)}),this.cue(`b`,this.introLength/2+.1,()=>{this.speech(1,r.char.introLine),t.playClip(`/assets/memes/${r.char.id}_1.mp3`,.95)})',
-        'Play matching _1.mp3 audio on intro speech bubbles',
+        'this.cue(`a`,.5,()=>sayLine(this,0,`intro`,{priority:2})),this.cue(`b`,this.introLength/2+.1,()=>sayLine(this,1,`intro`,{priority:2}))',
+        'Route round intros through sayLine',
     )
     ctx.replace_exact(
         'this.ctx.audio.announce(r.perfect?`perfect`:`wins_${e.char.id}`),this.speech(r.outcome,this.diwali?It(e.char.id,`win`,e.char.winLine):e.char.winLine)',
-        'this._lastRoundPerfect=r.perfect,(r.perfect?this.ctx.audio.announce(`perfect`):(()=>{let wc=kn[e.char.id];wc&&this.ctx.audio.playClip(wc,Mn)})()),this.speech(r.outcome,e.char.winLine)',
-        'Play matching kn win voice on every round win',
+        'this._lastRoundPerfect=r.perfect,r.perfect&&this.ctx.audio.announce(`perfect`),sayLine(this,r.outcome,`win`,{priority:4})',
+        'Route round wins through sayLine',
     )
     ctx.replace_exact(
         'else if(this.match.winner!==null){let e=kn[this.fighters[this.match.winner].char.id];e&&this.cue(`winLine`,1.2,()=>t.playClip(e,Mn))}',
-        'else if(this._lastRoundPerfect&&this.match.winner!==null){let e=kn[this.fighters[this.match.winner].char.id];e&&this.cue(`winLine`,1.2,()=>t.playClip(e,Mn))}',
-        'Avoid double-playing kn on non-perfect matchOver',
+        'else if(this.match.winner!==null){sayLine(this,this.match.winner,`win`,{priority:4})}',
+        'Route match-over win line through sayLine',
+    )
+    ctx.replace_exact(
+        'startRound(e){e||this.emit',
+        'startRound(e){window.__activeBattle=this,e||this.emit',
+        'Track active battle for fighter dialogue',
+    )
+    ctx.replace_exact(
+        'startAttack(e){this.attack={def:no[e],frame:0,hasHit:!1},this.enter(`attack`),this.stateFrames=0}',
+        'startAttack(e){this.attack={def:no[e],frame:0,hasHit:!1},this.enter(`attack`),this.stateFrames=0,(e===`special1`||e===`special2`)&&sayLine(window.__activeBattle,this.side,e,{priority:2})}',
+        'Route special startup through sayLine',
+    )
+    ctx.replace_exact(
+        'this.superCaster=e,this.superMove=kd',
+        'this.superCaster=e,window.__activeBattle=this,sayLine(this,e,`super`,{priority:4}),this.superMove=kd',
+        'Route super start through sayLine',
+    )
+    ctx.replace_exact(
+        'speech:(t,r)=>this.speech(t===`caster`?e:n.side,r)',
+        'battle:this,speech:(t,r)=>sayLine(this,t===`caster`?e:n.side,`super`,{priority:4})',
+        'Route super speech beats through sayLine',
+    )
+    ctx.replace_exact(
+        'speech:(t,r)=>this.speech(t===`attacker`?e:n.side,r)',
+        'battle:this,speech:(t,r)=>sayLine(this,t===`attacker`?e:n.side,`bark1`,{priority:2})',
+        'Route grapple speech through sayLine',
+    )
+    ctx.replace_exact(
+        'let l=Dn[t.char.id];l&&i.playClip(l),',
+        '',
+        'Remove fire-at-t0 super audio',
+    )
+    ctx.replace_exact(
+        'window.setTimeout(()=>i.remove(),2e3)}};function Pf',
+        'window.setTimeout(()=>i.remove(),3e3)}};function Pf',
+        'Patch speech bubble duration to 3000ms',
+    )
+    ctx.replace_exact(
+        'let e=+(this.playerSide===0);if(this.fighters[e].actionable){let t=Qo(this.fighters[e].char.id,this.rng);this.emit({t:`ev`,e:`speech`,side:e,text:t}),this.speech(e,t)}',
+        'let e=+(this.playerSide===0);if(this.fighters[e].actionable){sayLine(this,e,`bark1`,{priority:1})}',
+        'Remove random idle taunts and route bark1 through sayLine',
     )

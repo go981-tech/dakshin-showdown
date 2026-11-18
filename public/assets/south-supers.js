@@ -22,6 +22,7 @@ import {
   TorusGeometry,
   Vector3
 } from "three";
+import { sayLine } from "./south-kit.js?v=20261129";
 
 const EMPTY_IN = { moveX: 0, up: false, down: false, punch: false, kick: false, grab: false, super: false };
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -92,6 +93,8 @@ class SouthSuperBase {
   constructor(d, h) {
     this.d = d;
     this.h = h;
+    d.battle = d.battle || (typeof window !== "undefined" ? window.__activeBattle : null);
+    d.speech = (side) => sayLine(d.battle, side, "super", { priority: 3 });
     this.t = 0;
     this.done = false;
     this.impactDone = false;
