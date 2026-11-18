@@ -1438,13 +1438,26 @@ export async function sayLine(battle, side, lineId, { priority = 1, allowUnappro
   const fighter = battle.fighters?.[resolveDialogueSide(battle, side)];
   const fighterId = fighter?.char?.id;
   const entry = lines?.[fighterId]?.[lineId];
-  if (!entry?.text || entry.approved === false && !allowUnapproved) return false;
+  if (!entry?.text) {
+    window.__southDebug?.recordDropped?.({ lineId, priority, approved: false, reason: "Missing line" });
+    return false;
+  }
+  if (entry.approved === false && !allowUnapproved) {
+    window.__southDebug?.recordDropped?.({ lineId, priority, approved: false, reason: "Unapproved line" });
+    return false;
+  }
 
   const numericSide = resolveDialogueSide(battle, side);
   const now = performance.now();
   const active = _activeVoiceLines.get(numericSide);
-  if (active && active.expiresAt > now && active.priority > priority) return false;
-  if (active && active.expiresAt > now && active.priority === priority && active.lineId === lineId) return false;
+  if (active && active.expiresAt > now && active.priority > priority) {
+    window.__southDebug?.recordDropped?.({ lineId, priority, approved: entry.approved !== false, reason: "Priority blocked" });
+    return false;
+  }
+  if (active && active.expiresAt > now && active.priority === priority && active.lineId === lineId) {
+    window.__southDebug?.recordDropped?.({ lineId, priority, approved: entry.approved !== false, reason: "Duplicate line" });
+    return false;
+  }
 
   _activeVoiceLines.set(numericSide, {
     lineId,
@@ -1461,11 +1474,23 @@ export async function sayLine(battle, side, lineId, { priority = 1, allowUnappro
   const audio = battle.ctx?.audio;
   if (entry.audio && audio && !audio.muted) {
     try {
-      audio.playClip?.(entry.audio, 0.95);
+      if (typeof audio.playClip !== "function") {
+        throw new Error("battle audio has no playClip API");
+      }
+      audio.playClip(entry.audio, 0.95);
     } catch (error) {
       console.error("Dialogue audio failed:", error);
+      window.__southDebug?.addLog?.("error", `Audio failed: ${entry.audio}`, error.message);
     }
   }
+  window.__southDebug?.recordDialogue?.({
+    lineId,
+    priority,
+    fighterId,
+    expectedFighterId: fighterId,
+    text: entry.text,
+    entry
+  });
   return true;
 }
 

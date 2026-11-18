@@ -5,6 +5,10 @@ def apply(ctx):
         'window.__local2P=!1;window.__selectedAssist=window.__selectedAssist||"sumo";window.__censorLock=null;window.__marinaWaveSlip=!1;window.__lastMatchStats=null;\n',
         "prepend south-kit & south-supers imports",
     )
+    ctx.prepend(
+        'import"./debug-dialogue.js?v=20261129";\n',
+        "prepend live debug dialogue tools",
+    )
 
     ctx.replace_span(
         'function We(){if(!(typeof window>`u`||He)){',

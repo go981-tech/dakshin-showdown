@@ -1,3 +1,4 @@
+import"./debug-dialogue.js?v=20261129";
 import{populateSouthModels,loadSouthCharacter,buildMarinaStage,buildBusStandStage,buildDebateStudioStage,updateSouthStageHazards,upgradeSouthCrowd,updateSouthCrowd,triggerMemeOnAction,sayLine,spawnOratorSoundwave,triggerKootaniAssist,updateKootaniAssist,updateCensorBossMechanic,onCensorBossGrabBreak,pushFanWarComment,triggerPaalAbhishekam,computeBoxOfficeVerdict,cleanupSouthBattle}from"./south-kit.js?v=20261129";
 import{createSouthSuper}from"./south-supers.js?v=20261129";
 window.__local2P=!1;window.__selectedAssist=window.__selectedAssist||"sumo";window.__censorLock=null;window.__marinaWaveSlip=!1;window.__lastMatchStats=null;
