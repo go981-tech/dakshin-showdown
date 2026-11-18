@@ -33,10 +33,11 @@ import { ROSTER_3D_BY_ENGINE_ID, TAMIL_ROSTER_3D, CHARACTER_GLB_MAP, DEFAULT_FRA
 import { Fighter3D, STATES, FightKaroTamil3D } from "./GameEngine3D.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { clone as skeletonClone } from "three/addons/utils/SkeletonUtils.js";
+import { buildClips as buildSouthSpecialClips } from "./specials/index.js";
 
 const TEX_VER = "20261126";
 const GLB_IDS = ["modi", "rahul", "didi", "yogi", "trump", "nitin", "ravi", "lalu", "mbapu", "amit", "dhruv", "nirmala", "rangaraj"];
-const ANIM_DONOR_MAP = { nirmala: "didi", rangaraj: "amit" };
+const ANIM_DONOR_MAP = {};
 const VESHTI_IDS = new Set(["modi", "yogi", "lalu", "mbapu", "amit", "ravi"]);
 const KURTA_IDS = new Set(); // Native OutfitTop on RPM rigs avoids donor sleeve tears & jagged cuffs
 const SHAWL_IDS = new Set(["modi", "rahul", "yogi", "ravi", "lalu", "mbapu", "amit"]);
@@ -800,12 +801,17 @@ export async function loadSouthCharacter(id, Vc, Oc, kc, N, at, renderer, onProg
       const legBone = findNode(scene, "LeftUpLeg");
       const legY = legBone ? legBone.getWorldPosition(new Vector3()).y || at : at;
       const def = N?.[id] || {};
+      const specialClips = buildSouthSpecialClips(scene, id);
+      const clipMap = {};
+      for (const clip of specialClips) clipMap[clip.name] = clip;
+      scene.userData = scene.userData || {};
+      scene.userData.southSpecialClips = clipMap;
 
       Vc[id] = {
         scene,
         scale: at / legY,
         dance: clips.find((c) => c.name === "dance") ?? null,
-        clips: def.fightClips ? clips : []
+        clips: def.fightClips ? [...clips, ...specialClips] : specialClips
       };
 
       if (id === "yogi" && propGltf && !Oc.bulldozer) {
