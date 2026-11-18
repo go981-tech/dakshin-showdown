@@ -32,6 +32,7 @@ const easeInOut = (t) => {
   const k = clamp01(t);
   return k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2;
 };
+const normalizedSeconds = (value, duration) => clamp01(value) * duration;
 
 let _glowTex = null;
 function glowTex() {
@@ -103,7 +104,7 @@ class SouthSuperBase {
       value = { name: value, time: 0, fade: 0.12 };
     }
     const id = this.d?.caster?.char?.id;
-    if (id && value.name && !value.name.startsWith("south_")) {
+    if (id && value.name === "super") {
       value = { ...value, name: `south_super_${id}` };
     }
     this._casterClip = value;
@@ -312,7 +313,7 @@ class StalinCycleSuper extends SouthSuperBase {
       audio.whoosh?.();
     });
     this.once("s2", 1.45, () => {
-      speech("target", "Ayyo bicycle wheelie-aa?!");
+      d.battle?.speech(d.target.side, "Ayyo bicycle wheelie-aa?!", 2200);
       popup("DRAVIDIAN MODEL!", this.v2.set(caster.x, 2.3, 0.3), "#e11d48");
       audio.superRelease?.("chakra");
       cam.shake(0.18, 0.3);
@@ -360,7 +361,7 @@ class StalinCycleSuper extends SouthSuperBase {
         caster.x = clampArenaX(this.targetX0 - d * (1.3 - 0.5 * k));
         caster.y = 2.2 * Math.sin(k * Math.PI * 0.72);
         this.casterPose = null;
-        this.casterClip = { name: "butterfly", time: u * 1.1, fade: 0.1 };
+        this.casterClip = { name: "butterfly", time: normalizedSeconds(u, 1.1), fade: 0.1 };
         this.bike.group.position.set(caster.x + d * (0.2 + k * 0.6), caster.y * 0.55, 0.05);
         this.bike.group.rotation.set(0, d > 0 ? 0 : Math.PI, 0.55 * k);
       } else {
@@ -368,7 +369,7 @@ class StalinCycleSuper extends SouthSuperBase {
         caster.x = clampArenaX(this.targetX0 - d * (0.8 - 0.15 * k));
         caster.y = 1.9 * (1 - k);
         this.casterPose = null;
-        this.casterClip = { name: "flyingkick", time: k * 0.85, fade: 0.08 };
+        this.casterClip = { name: "flyingkick", time: normalizedSeconds(k, 0.85), fade: 0.08 };
         this.bike.group.position.set(this.targetX0 - d * (0.9 * (1 - k)), 0.8 * (1 - k) + 0.3, 0.05);
         this.bike.group.rotation.z = -1.1 * k;
       }
@@ -527,20 +528,20 @@ class ThalapathyBlitzSuper extends SouthSuperBase {
       if (u < 0.35) {
         caster.x = clampArenaX(this.targetX0 - d * 0.95);
         caster.facing = d;
-        this.casterClip = { name: "jabcross", time: u * 2.2, fade: 0.08 };
+        this.casterClip = { name: "jabcross", time: normalizedSeconds(u, 2.2), fade: 0.08 };
         this.slashRibbons.children[0].visible = true;
       } else if (u < 0.72) {
         caster.x = clampArenaX(this.targetX0 + d * 1.0);
         caster.facing = -d;
         caster.y = 0.45;
-        this.casterClip = { name: "hurricane_m", time: (u - 0.35) * 2.1, fade: 0.08 };
+        this.casterClip = { name: "hurricane_m", time: normalizedSeconds(u - 0.35, 2.1), fade: 0.08 };
         this.slashRibbons.children[1].visible = true;
         this.slashRibbons.children[2].visible = true;
       } else {
         caster.x = clampArenaX(this.targetX0 - d * 0.85);
         caster.facing = d;
         caster.y = 0.25;
-        this.casterClip = { name: "highkick_m", time: (u - 0.72) * 2.8, fade: 0.06 };
+        this.casterClip = { name: "highkick_m", time: normalizedSeconds(u - 0.72, 2.8), fade: 0.06 };
         this.slashRibbons.children[3].visible = true;
       }
       arena.setMood(0.75);
@@ -663,7 +664,7 @@ class IronAmmaSuper extends SouthSuperBase {
       const u = (t - 1.35) / (this.IMPACT - 1.35);
       caster.y = 1.25;
       this.throne.position.set(caster.x, caster.y - 0.15, -0.2);
-      this.casterClip = { name: u < 0.55 ? "palm_m" : "snapkick2", time: u * 1.6, fade: 0.1 };
+      this.casterClip = { name: u < 0.55 ? "palm_m" : "snapkick2", time: normalizedSeconds(u, 1.6), fade: 0.1 };
       this.tiffins.visible = u < 0.72;
       this.tiffins.children.forEach((m, idx) => {
         const drop = clamp01(u * 1.5 - idx * 0.08);
@@ -685,7 +686,7 @@ class IronAmmaSuper extends SouthSuperBase {
       this.tiffins.visible = false;
       this.crest.position.y = 0.75 + u * 2.5;
       this.crest.scale.setScalar(Math.max(0.01, 1.45 * (1 - u)));
-      this.casterClip = { name: "palm", time: u * 0.9, fade: 0.15 };
+      this.casterClip = { name: "palm", time: normalizedSeconds(u, 0.9), fade: 0.15 };
       arena.setMood(0.7 * (1 - u));
       cam.set(this.v2.set((caster.x + target.x) / 2, 2.0, 6.9), this.v3.set(target.x, 1.0, 0), 3, 42);
     }
@@ -788,12 +789,12 @@ class PushpaSandalSuper extends SouthSuperBase {
       }
       if (u < 0.6) {
         caster.x = clampArenaX(this.startX + (this.targetX0 - d * 1.1 - this.startX) * easeOut(u / 0.6));
-        this.casterClip = { name: u < 0.3 ? "hook" : "uppercut", time: u * 2.2, fade: 0.08 };
+        this.casterClip = { name: u < 0.3 ? "hook" : "uppercut", time: normalizedSeconds(u, 2.2), fade: 0.08 };
       } else {
         const k = (u - 0.6) / 0.4;
         caster.x = clampArenaX(this.targetX0 - d * (1.1 - 0.5 * k));
         caster.y = 2.3 * Math.sin(k * Math.PI * 0.7);
-        this.casterClip = { name: "dropkick", time: k * 0.85, fade: 0.06 };
+        this.casterClip = { name: "dropkick", time: normalizedSeconds(k, 0.85), fade: 0.06 };
       }
       arena.setMood(0.75);
       cam.set(this.v2.set((caster.x + this.targetX0) / 2, 2.1, 5.4), this.v3.set(this.targetX0, 1.25, 0), 4, 44);
@@ -885,7 +886,7 @@ class PinarayiSilverLineSuper extends SouthSuperBase {
       this.setTargetFreeze(dt, { spineF: 0.4 });
       caster.x = clampArenaX(this.targetX0 - d * (1.2 - 0.4 * u));
       caster.y = launch * 1.8;
-      this.casterClip = { name: u < 0.5 ? "thrustkick" : "roundhouse_m", time: u * 1.8, fade: 0.08 };
+      this.casterClip = { name: u < 0.5 ? "thrustkick" : "roundhouse_m", time: normalizedSeconds(u, 1.8), fade: 0.08 };
       arena.setMood(0.7);
       cam.set(this.v2.set(this.targetX0, 2.2, 6.2), this.v3.set(this.targetX0, 1.4, 0), 4, 46);
     } else {
@@ -988,7 +989,7 @@ class DksSilkBoardSuper extends SouthSuperBase {
       this.props.bande.rotation.y += dt * 2.5;
       this.props.bus.position.x = this.targetX0 - d * (5.5 * (1 - drop));
       caster.x = clampArenaX(this.startX + (this.targetX0 - d * 1.1 - this.startX) * easeOut(u));
-      this.casterClip = { name: u < 0.5 ? "mmaround" : "sidekick", time: u * 1.7, fade: 0.08 };
+      this.casterClip = { name: u < 0.5 ? "mmaround" : "sidekick", time: normalizedSeconds(u, 1.7), fade: 0.08 };
       arena.setMood(0.7);
       cam.set(this.v2.set(this.targetX0, 2.3, 5.8), this.v3.set(this.targetX0, 1.5, 0), 4, 45);
     } else {
@@ -1078,7 +1079,7 @@ class PowerStarOGSuper extends SouthSuperBase {
       caster.facing = -side;
       caster.y = stepIdx === 2 ? 0.65 : 0;
       const clips = ["spinflip", "hurricane", "highkick", "upper", "palm"];
-      this.casterClip = { name: clips[stepIdx], time: (u * 5 - stepIdx) * 0.85, fade: 0.05 };
+      this.casterClip = { name: clips[stepIdx], time: normalizedSeconds(u * 5 - stepIdx, 0.85), fade: 0.05 };
       this.arcs.blade.position.set(caster.x - side * 0.65, caster.y + 1.25, 0.2);
       this.arcs.blade.rotation.z = side * 0.6 + u * 12;
       arena.setMood(0.85);
@@ -1206,7 +1207,7 @@ class SeemanMikeSetSuper extends SouthSuperBase {
       }
       caster.x = clampArenaX(this.startX + (this.targetX0 - d * 0.9 - this.startX) * easeInOut(u));
       caster.y = 0.85 * (1 - u);
-      this.casterClip = { name: u < 0.5 ? "bodypunch" : "roundhouse", time: u * 1.7, fade: 0.08 };
+      this.casterClip = { name: u < 0.5 ? "bodypunch" : "roundhouse", time: normalizedSeconds(u, 1.7), fade: 0.08 };
       arena.setMood(0.7);
       cam.set(this.v2.set((caster.x + this.targetX0) / 2, 2.0, 5.6), this.v3.set(this.targetX0, 1.25, 0), 4, 44);
     } else {
@@ -1300,7 +1301,7 @@ class PeriyarTorchSuper extends SouthSuperBase {
       const u = (t - 1.45) / (this.IMPACT - 1.45);
       caster.x = clampArenaX(this.startX + (this.targetX0 - d * 0.95 - this.startX) * easeInOut(u));
       caster.y = 1.05 * (1 - u * 0.6);
-      this.casterClip = { name: u < 0.55 ? "hurricane" : "flyingkick", time: u * 1.6, fade: 0.08 };
+      this.casterClip = { name: u < 0.55 ? "hurricane" : "flyingkick", time: normalizedSeconds(u, 1.6), fade: 0.08 };
       this.props.torch.position.set(caster.x + d * 0.5, caster.y + 1.05, 0.2);
       this.props.torch.rotation.z = -d * u * 10;
       this.props.chains.forEach((c, i) => {
@@ -1318,7 +1319,7 @@ class PeriyarTorchSuper extends SouthSuperBase {
       });
       this.props.torch.position.set(caster.x + d * 0.35, 0.9, 0.2);
       this.props.torch.rotation.z = 0;
-      this.casterClip = { name: "bow", time: Math.min(1.5, u * 1.4), fade: 0.15 };
+      this.casterClip = { name: "bow", time: normalizedSeconds(u, 1.4), fade: 0.15 };
       arena.setMood(0.8 * (1 - u));
       cam.set(this.v2.set((caster.x + target.x) / 2, 2.0, 7.0), this.v3.set(target.x, 1.0, 0), 3, 42);
     }
@@ -1403,7 +1404,7 @@ class AnnamalaiPressSuper extends SouthSuperBase {
         f.rotation.y += dt * 3;
       });
       caster.x = clampArenaX(this.startX + (this.targetX0 - d * 0.9 - this.startX) * easeOut(u));
-      this.casterClip = { name: u < 0.55 ? "sbcombo" : "sidekick", time: u * 1.8, fade: 0.08 };
+      this.casterClip = { name: u < 0.55 ? "sbcombo" : "sidekick", time: normalizedSeconds(u, 1.8), fade: 0.08 };
       arena.setMood(0.72);
       cam.set(this.v2.set((caster.x + this.targetX0) / 2, 2.1, 5.5), this.v3.set(this.targetX0, 1.3, 0), 4, 44);
     } else {
@@ -1522,7 +1523,7 @@ class MgNaYouTubeSuper extends SouthSuperBase {
         this.yt.hound.position.set(caster.x + (this.targetX0 - caster.x) * k, 0.55 + Math.sin(k * Math.PI) * 0.9, 0.3);
       }
       caster.x = clampArenaX(this.startX + (this.targetX0 - d * 1.0 - this.startX) * easeOut(u));
-      this.casterClip = { name: u < 0.55 ? "bxflurry" : "flyingkick", time: u * 1.8, fade: 0.08 };
+      this.casterClip = { name: u < 0.55 ? "bxflurry" : "flyingkick", time: normalizedSeconds(u, 1.8), fade: 0.08 };
       arena.setMood(0.72);
       cam.set(this.v2.set((caster.x + this.targetX0) / 2, 2.1, 5.6), this.v3.set(this.targetX0, 1.3, 0), 4, 44);
     } else {
@@ -1618,7 +1619,7 @@ class NirmalaGstSuper extends SouthSuperBase {
       const u = (t - 1.3) / (this.IMPACT - 1.3);
       this.ledger.book.position.y = 6.5 * (1 - u * u) + 1.05;
       this.ledger.book.rotation.y = u * Math.PI * 2;
-      this.casterClip = { name: "snapkick2", time: u * 1.0, fade: 0.08 };
+      this.casterClip = { name: "snapkick2", time: normalizedSeconds(u, 1.0), fade: 0.08 };
       arena.setMood(0.7);
       cam.set(this.v2.set((caster.x + this.targetX0) / 2, 2.2, 5.8), this.v3.set(this.targetX0, 1.4, 0), 4, 44);
     } else {
@@ -1706,7 +1707,7 @@ class RangarajDebateSuper extends SouthSuperBase {
         r.position.set(caster.x + (this.targetX0 - caster.x) * p, 1.25, 0.2);
         r.scale.setScalar(1 + p * 1.6);
       });
-      this.casterClip = { name: "sidekick", time: u * 0.9, fade: 0.08 };
+      this.casterClip = { name: "sidekick", time: normalizedSeconds(u, 0.9), fade: 0.08 };
       arena.setMood(0.72);
       cam.set(this.v2.set((caster.x + this.targetX0) / 2, 2.1, 5.6), this.v3.set(this.targetX0, 1.3, 0), 4, 44);
     } else {
@@ -1735,7 +1736,7 @@ class CleanFallbackSuper extends SouthSuperBase {
 
     this.setTargetFreeze(dt, { headF: -0.25 });
     this.casterClip = t < this.IMPACT
-      ? { name: "super", time: clamp01(t / this.IMPACT), fade: 0.12 }
+      ? { name: "super", time: t, fade: 0.12 }
       : null;
     caster.facing = d;
 

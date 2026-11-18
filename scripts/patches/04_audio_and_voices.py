@@ -36,6 +36,11 @@ def apply(ctx):
         'Route round intros through sayLine',
     )
     ctx.replace_exact(
+        '!this.isGuest&&this.phaseTime>this.introLength&&(n.forceState(`idle`),r.forceState(`idle`),this.setPhase(`roundCall`))',
+        '!this.isGuest&&this.phaseTime>this.introLength&&(!t.clipActive||this.phaseTime>4.5)&&(n.forceState(`idle`),r.forceState(`idle`),this.setPhase(`roundCall`))',
+        'Intro waits for no clip active up to 4.5s',
+    )
+    ctx.replace_exact(
         'this.ctx.audio.announce(r.perfect?`perfect`:`wins_${e.char.id}`),this.speech(r.outcome,this.diwali?It(e.char.id,`win`,e.char.winLine):e.char.winLine)',
         'this._lastRoundPerfect=r.perfect,r.perfect&&this.ctx.audio.announce(`perfect`),sayLine(this,r.outcome,`win`,{priority:4})',
         'Route round wins through sayLine',
@@ -46,13 +51,18 @@ def apply(ctx):
         'Route match-over win line through sayLine',
     )
     ctx.replace_exact(
+        '!this.isGuest&&this.phaseTime>3.6&&(this.match.winner===null?(this.match.nextRound(),this.startRound(!1)):this.setPhase(`matchOver`))',
+        '!this.isGuest&&this.phaseTime>3.6&&(!t.clipActive||this.phaseTime>6)&&(this.match.winner===null?(this.match.nextRound(),this.startRound(!1)):this.setPhase(`matchOver`))',
+        'Round-over waits for no clip active up to 6.0s',
+    )
+    ctx.replace_exact(
         'startRound(e){e||this.emit',
         'startRound(e){window.__activeBattle=this,e||this.emit',
         'Track active battle for fighter dialogue',
     )
     ctx.replace_exact(
         'startAttack(e){this.attack={def:no[e],frame:0,hasHit:!1},this.enter(`attack`),this.stateFrames=0}',
-        'startAttack(e){this.attack={def:no[e],frame:0,hasHit:!1},this.enter(`attack`),this.stateFrames=0,(e===`special1`||e===`special2`)&&sayLine(window.__activeBattle,this.side,e,{priority:2})}',
+        'startAttack(e){this.attack={def:no[e],frame:0,hasHit:!1},this.enter(`attack`),this.stateFrames=0,(e===`special1`||e===`special2`)&&window.__activeBattle&&(triggerMemeOnAction(window.__activeBattle,this,e),sayLine(window.__activeBattle,this.side,e,{priority:2}))}',
         'Route special startup through sayLine',
     )
     ctx.replace_exact(
@@ -62,7 +72,7 @@ def apply(ctx):
     )
     ctx.replace_exact(
         'speech:(t,r)=>this.speech(t===`caster`?e:n.side,r)',
-        'battle:this,speech:(t,r)=>sayLine(this,t===`caster`?e:n.side,`super`,{priority:4})',
+        'battle:this,speech:(t,r)=>t===`target`||t===`defender`||t===`opp`?this.speech(n.side,r,2200):sayLine(this,e,`super`,{priority:4})',
         'Route super speech beats through sayLine',
     )
     ctx.replace_exact(
@@ -92,11 +102,16 @@ def apply(ctx):
     )
     ctx.replace_exact(
         'speech(e,t,n,r=``){let i=document.createElement(`div`);',
-        'speech(e,t,n,r=``,d=3000){let i=document.createElement(`div`);',
+        'speech(e,t,n,r=``,d=3000){let i=document.createElement(`div`);i.style.setProperty(`--speech-duration`,`${Math.max(300,d)}ms`);',
         'Add HUD subtitle duration parameter',
     )
     ctx.replace_exact(
         'window.setTimeout(()=>i.remove(),3e3)',
         'window.setTimeout(()=>i.remove(),d)',
         'Use actual approved subtitle duration',
+    )
+    ctx.replace_exact(
+        'get clipActive(){return!!this.bufClip||!!this.clip}playClip',
+        'get clipActive(){return!!this.bufClip||!!this.clip}get clipEndsAt(){if(this.bufClip&&this.ctx){let e=this.bufClip.startedAt+this.bufClip.duration-this.ctx.currentTime;return e>0?e*1e3:0}let e=this.clip;return e&&!e.paused&&e.duration&&Number.isFinite(e.duration)?Math.max(0,(e.duration-e.currentTime)*1e3):0}playClip',
+        'Expose clipEndsAt while preserving clipActive',
     )
