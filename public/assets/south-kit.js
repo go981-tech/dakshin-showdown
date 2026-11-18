@@ -33,7 +33,7 @@ import { ROSTER_3D_BY_ENGINE_ID, TAMIL_ROSTER_3D, CHARACTER_GLB_MAP, DEFAULT_FRA
 import { Fighter3D, STATES, FightKaroTamil3D } from "./GameEngine3D.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { clone as skeletonClone } from "three/addons/utils/SkeletonUtils.js";
-import { buildClips as buildSouthSpecialClips } from "./specials/index.js";
+import { buildClips as buildSouthSpecialClips, triggerSpecialFx } from "./specials/index.js";
 
 const TEX_VER = "20261126";
 const GLB_IDS = ["modi", "rahul", "didi", "yogi", "trump", "nitin", "ravi", "lalu", "mbapu", "amit", "dhruv", "nirmala", "rangaraj"];
@@ -1488,9 +1488,10 @@ const SPECIAL_BURST_COLORS = {
 };
 const _burstPos = new Vector3();
 
-function spawnRosterSpecial3D(battle, attacker, opp, cfg, col) {
+function spawnRosterSpecial3D(battle, attacker, opp, cfg, col, moveId = "special1") {
   const sceneGroup = battle?.ctx?.arena?.group || battle?.ctx?.scene;
   if (!sceneGroup) return;
+  if (triggerSpecialFx(battle, attacker, opp, moveId, 0)) return;
   const dir = attacker.facing || 1;
   const ax = attacker.x || 0;
   const ay = (attacker.y || 0) + 1.05;
@@ -1623,7 +1624,7 @@ export function triggerMemeOnAction(battle, attacker, moveId) {
         drag: 1.8
       });
       if (moveId === "special1" || moveId === "special2" || moveId === "finisher") {
-        spawnRosterSpecial3D(battle, attacker, opp, rosterCfg, col);
+        spawnRosterSpecial3D(battle, attacker, opp, rosterCfg, col, moveId);
       }
     } catch {}
   }
