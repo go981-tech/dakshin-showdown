@@ -1393,64 +1393,77 @@ export function updateSouthCrowd(arena, _dummy) {
   }
 }
 
-const ACTION_MEMES = {
-  modi: [
-    { text: "Tamilnattu arasin mudhalamaicharaga...", url: "/assets/memes/modi_1.mp3" },
-    { text: "Nermaiyaga seyven endrum urudhi mozhigiren!", url: "/assets/memes/modi_2.mp3" }
-  ],
-  rahul: [
-    { text: "What bro? It's very wrong bro!", url: "/assets/memes/rahul_1.mp3" },
-    { text: "En nenjil kudiyirukkum...", url: "/assets/memes/rahul_2.mp3" }
-  ],
-  didi: [
-    { text: "Unmaiyana makkal iyakkam!", url: "/assets/memes/didi_1.mp3" },
-    { text: "Naan irukkindra varai, enakkup pinnalum!", url: "/assets/memes/didi_2.mp3" }
-  ],
-  trump: [
-    { text: "Pushpa Pushparaj... Thaggedhe Le!", url: "/assets/memes/trump_1.mp3" },
-    { text: "Pushpa ante flower-a? Fireuu!", url: "/assets/memes/trump_2.mp3" }
-  ],
-  yogi: [
-    { text: "Mukhyamantri kaserayil aakam!", url: "/assets/memes/yogi_1.mp3" },
-    { text: "Entho undakki kalayam ennanaanu vicharikunnathu!", url: "/assets/memes/yogi_2.mp3" }
-  ],
-  nitin: [
-    { text: "One thing I'd like to tell you — my birthday...", url: "/assets/memes/nitin_1.mp3" },
-    { text: "By profession I'm a businessman!", url: "/assets/memes/nitin_2.mp3" }
-  ],
-  ravi: [
-    { text: "Naaku konchem thikka undhi, kaani daniko lekka undhi!", url: "/assets/memes/ravi_1.mp3" },
-    { text: "Janamlo unta! Janam la unta!", url: "/assets/memes/ravi_2.mp3" }
-  ],
-  lalu: [
-    { text: "Moondru yaanaigal uyirizhundhirukkindranar!", url: "/assets/memes/lalu_1.mp3" },
-    { text: "1500 yaanai irundhuchu... ippa 650 thaan!", url: "/assets/memes/lalu_2.mp3" }
-  ],
-  mbapu: [
-    { text: "Kadavul kitta undiyal vekkiringale — adhu Aathigam!", url: "/assets/memes/mbapu_1.mp3" },
-    { text: "Nambamal poottu podringle — adhu thaan Naathigam!", url: "/assets/memes/mbapu_2.mp3" }
-  ],
-  amit: [
-    { text: "Adhukkellam bayappadathinga! Naalaiku onnume illaina...", url: "/assets/memes/amit_1.mp3" },
-    { text: "Ellathaiyum paathutten! Ellathaiyum paathachu!", url: "/assets/memes/amit_2.mp3" }
-  ],
-  dhruv: [
-    { text: "Hello everyone, naan Madan Gowri! Hello my dear MG Squad!", url: "/assets/memes/dhruv_1.mp3" },
-    { text: "Indha video motivational video-va illa inspirational-a...", url: "/assets/memes/dhruv_2.mp3" }
-  ],
-  nirmala: [
-    { text: "Waise parivar se aati hoon jahan onion rakhte hi nahi!", url: "/assets/memes/nirmala_1.mp3" },
-    { text: "Social media: popcorn ke upar bhi daal rahe hain tax!", url: "/assets/memes/nirmala_2.mp3" }
-  ],
-  rangaraj: [
-    { text: "Edhirkatchi thalaivarum pradhanarum pesittu iruppanga!", url: "/assets/memes/rangaraj_1.mp3" },
-    { text: "Irandaavadhu point vandhu — Bharat Pradhanam!", url: "/assets/memes/rangaraj_2.mp3" }
-  ]
-};
+const _barkSequence = [0, 0];
 
-const _memeCooldown = [0, 0];
-const _memeIdx = [0, 0];
-const _memeAudio = new Map();
+let _voiceLinesPromise = null;
+const _activeVoiceLines = new Map();
+
+function resolveDialogueSide(battle, side) {
+  if (typeof side === "number") return side === 0 || side === 1 ? side : battle?.playerSide ?? 0;
+  if (side === "target" || side === "defender" || side === "opp") {
+    const caster = battle?.superCaster ?? battle?.grappleSide ?? battle?.playerSide ?? 0;
+    return caster === 0 ? 1 : 0;
+  }
+  if (side === "caster" || side === "attacker") {
+    return battle?.superCaster ?? battle?.grappleSide ?? battle?.playerSide ?? 0;
+  }
+  return battle?.playerSide ?? 0;
+}
+
+function loadVoiceLines() {
+  if (!_voiceLinesPromise) {
+    _voiceLinesPromise = fetch("/assets/voice-lines.json")
+      .then((response) => {
+        if (!response.ok) throw new Error(`voice-lines.json HTTP ${response.status}`);
+        return response.json();
+      })
+      .catch((error) => {
+        console.error("Unable to load voice-lines.json:", error);
+        _voiceLinesPromise = null;
+        return null;
+      });
+  }
+  return _voiceLinesPromise;
+}
+
+export async function sayLine(battle, side, lineId, { priority = 1, allowUnapproved = true } = {}) {
+  if (!battle) return false;
+  const lines = await loadVoiceLines();
+  const fighter = battle.fighters?.[resolveDialogueSide(battle, side)];
+  const fighterId = fighter?.char?.id;
+  const entry = lines?.[fighterId]?.[lineId];
+  if (!entry?.text || entry.approved === false && !allowUnapproved) return false;
+
+  const numericSide = resolveDialogueSide(battle, side);
+  const now = performance.now();
+  const active = _activeVoiceLines.get(numericSide);
+  if (active && active.expiresAt > now && active.priority > priority) return false;
+  if (active && active.expiresAt > now && active.priority === priority && active.lineId === lineId) return false;
+
+  _activeVoiceLines.set(numericSide, {
+    lineId,
+    priority,
+    expiresAt: now + 3000
+  });
+
+  try {
+    battle.speech(numericSide, entry.text);
+  } catch (error) {
+    console.error("Dialogue subtitle failed:", error);
+  }
+
+  const audio = battle.ctx?.audio;
+  if (entry.audio && audio && !audio.muted) {
+    try {
+      audio.playClip?.(entry.audio, 0.95);
+    } catch (error) {
+      console.error("Dialogue audio failed:", error);
+    }
+  }
+  return true;
+}
+
+if (typeof window !== "undefined") window.sayLine = sayLine;
 
 const SPECIAL_BURST_COLORS = {
   modi: 0xff2200,
@@ -1580,7 +1593,6 @@ function spawnRosterSpecial3D(battle, attacker, opp, cfg, col) {
 
 export function triggerMemeOnAction(battle, attacker, moveId) {
   if (!battle || !attacker || battle.phase !== "fight") return;
-  const now = performance.now();
   const side = attacker.side || 0;
   const isSpecial = ["special1", "special2", "finisher", "uppercut", "roundhouse", "sweep"].includes(moveId);
   const fx = battle.ctx?.fx;
@@ -1610,39 +1622,12 @@ export function triggerMemeOnAction(battle, attacker, moveId) {
     } catch {}
   }
 
-  if (now - _memeCooldown[side] < 2100) return;
-  if (!isSpecial && Math.random() > 0.35) return;
-
-  const entries = ACTION_MEMES[id];
-  if (!entries || !entries.length) return;
-
-  _memeCooldown[side] = now;
-  const lineIdx = _memeIdx[side]++ % entries.length;
-  const { text, url } = entries[lineIdx];
-
-  try {
-    battle.speech(side, text);
-  } catch {}
-
-  const audio = battle.ctx?.audio;
-  if (audio && !audio.muted && !audio.clipActive && typeof Audio !== "undefined") {
-    if (audio.clipBuffers?.has(url)) {
-      audio.playClip?.(url, 0.96);
-    } else {
-      let el = _memeAudio.get(url);
-      if (!el) {
-        el = new Audio(url);
-        el.volume = 0.95;
-        _memeAudio.set(url, el);
-      }
-      try {
-        el.volume = 0.95;
-        el.currentTime = 0;
-        audio.dipMusic?.(0.06, 1.8);
-        el.play().catch(() => {});
-      } catch {}
-    }
-  }
+  const lineId = moveId === "special1"
+    ? "special1"
+    : moveId === "special2" || moveId === "finisher"
+      ? "special2"
+      : `bark${(_barkSequence[side]++ % 2) + 1}`;
+  sayLine(battle, side, lineId, { priority: 2 });
 }
 
 /* ============================================================================
