@@ -90,6 +90,25 @@ function basicMat(color, extra = {}) {
 }
 
 class SouthSuperBase {
+  get casterClip() {
+    return this._casterClip || null;
+  }
+
+  set casterClip(value) {
+    if (!value) {
+      this._casterClip = null;
+      return;
+    }
+    if (typeof value === "string") {
+      value = { name: value, time: 0, fade: 0.12 };
+    }
+    const id = this.d?.caster?.char?.id;
+    if (id && value.name && !value.name.startsWith("south_")) {
+      value = { ...value, name: `south_super_${id}` };
+    }
+    this._casterClip = value;
+  }
+
   constructor(d, h) {
     this.d = d;
     this.h = h;
@@ -1701,6 +1720,39 @@ class RangarajDebateSuper extends SouthSuperBase {
   }
 }
 
+class CleanFallbackSuper extends SouthSuperBase {
+  constructor(d, h) {
+    super(d, h);
+    this.END = 3.6;
+    this.IMPACT = 2.35;
+  }
+
+  update(dt) {
+    this.t += dt;
+    const t = this.t;
+    const { caster, target, cam, arena } = this.d;
+    const d = this.dir;
+
+    this.setTargetFreeze(dt, { headF: -0.25 });
+    this.casterClip = t < this.IMPACT
+      ? { name: "super", time: clamp01(t / this.IMPACT), fade: 0.12 }
+      : null;
+    caster.facing = d;
+
+    if (t >= this.IMPACT && !this.impactDone) {
+      this.landImpact({ vx: 5.2, vy: 7.8, banner: "SUPER HIT!" });
+    }
+    cam.set(
+      this.v1.set((caster.x + target.x) / 2, 1.8, 5.4),
+      this.v2.set(target.x, 1.1, 0),
+      4,
+      42
+    );
+    arena.setMood(0.45 * (1 - clamp01((t - this.IMPACT) / (this.END - this.IMPACT))));
+    if (t >= this.END) this.done = true;
+  }
+}
+
 export function createSouthSuper(ctx, helpers) {
   switch (ctx.caster.char.id) {
     case "modi": return new StalinCycleSuper(ctx, helpers);
@@ -1715,8 +1767,7 @@ export function createSouthSuper(ctx, helpers) {
     case "amit": return new AnnamalaiPressSuper(ctx, helpers);
     case "nirmala": return new NirmalaGstSuper(ctx, helpers);
     case "rangaraj": return new RangarajDebateSuper(ctx, helpers);
-    case "dhruv":
-    default:
-      return new MgNaYouTubeSuper(ctx, helpers);
+    case "dhruv": return new MgNaYouTubeSuper(ctx, helpers);
+    default: return new CleanFallbackSuper(ctx, helpers);
   }
 }

@@ -43,12 +43,17 @@ def apply(ctx):
         'co 13 fighters',
     )
     ctx.replace_exact(
+        'for(let[e,t]of Object.entries(fo))',
+        'for(let[e,t]of Object.entries(fo)){for(let n of [`special1`,`special2`])n in t.strikes&&(t.strikes[n]={...t.strikes[n],clip:`south_${n}_${e}`})}for(let[e,t]of Object.entries(fo))',
+        'map all roster specials to fighter-specific custom clips',
+    )
+    ctx.replace_exact(
         'bo=[`modi`,`rahul`,`didi`,`trump`,`yogi`,`nitin`,`ravi`,`lalu`,`amit`,`dhruv`]',
         'bo=[`modi`,`rahul`,`didi`,`trump`,`yogi`,`nitin`,`ravi`,`lalu`,`amit`,`dhruv`,`nirmala`,`rangaraj`]',
         'bo 13 fighters',
     )
-    ctx.replace_exact('dhruv:`${xc}dhruv.glb${wc}`}', 'dhruv:`${xc}dhruv.glb${wc}`,nirmala:`${xc}didi.glb${Cc}`,rangaraj:`${xc}amit.glb${wc}`}', 'Tc 13 fighters')
-    ctx.replace_exact('dhruv:`/models/dhruv.glb${wc}`}', 'dhruv:`/models/dhruv.glb${wc}`,nirmala:`/models/didi.glb${Cc}`,rangaraj:`/models/amit.glb${wc}`}', 'Ec 13 fighters')
+    ctx.replace_exact('dhruv:`${xc}dhruv.glb${wc}`}', 'dhruv:`${xc}dhruv.glb${wc}`,nirmala:`/characters/12_nirmala_sitharaman.glb${wc}`,rangaraj:`/characters/13_rangaraj_pandey.glb${wc}`}', 'Tc 13 independent fighter entries')
+    ctx.replace_exact('dhruv:`/models/dhruv.glb${wc}`}', 'dhruv:`/models/dhruv.glb${wc}`,nirmala:`/characters/12_nirmala_sitharaman.glb${wc}`,rangaraj:`/characters/13_rangaraj_pandey.glb${wc}`}', 'Ec 13 independent fighter entries')
     ctx.replace_exact('dhruv:`${Yp}faces/dhruv.webp?v=20261107_real`}', 'dhruv:`${Yp}faces/dhruv.webp?v=20261107_real`,nirmala:`${Yp}faces/nirmala.webp?v=20261126`,rangaraj:`${Yp}faces/rangaraj.webp?v=20261126`}', 'Zp 13 fighters')
 
     new_pt = 'Pt={modi:{intro:`Vanakkam! Iniya Pongal!`,win:`Pongal vetri namadhe!`},rahul:{intro:`Pongal greetings to all fans!`,win:`Sweet Pongal, mass victory!`},didi:{intro:`Thai Piranthaal Vazhi Pirakkum!`,win:`Amma fortress celebrates Pongal!`},trump:{intro:`Fire Star Pongal! Zero filter!`,win:`Thaggedhe Le Pongal special!`},yogi:{intro:`Lal Salam & Pongal Vaazhthukkal!`,win:`Red Star victory celebration!`},nitin:{intro:`Pongal rush at Silk Board cleared!`,win:`Expressway sweet Pongal win!`},ravi:{intro:`Sankranti & Pongal Blockbuster!`,win:`Box office Pongal hit!`},lalu:{intro:`Vaigai Express Pongal special!`,win:`Thambi Pongal feast begins!`},mbapu:{intro:`Self-Respect Thai Pongal to all!`,win:`Rational light shines bright!`},amit:{intro:`Pongal press meet begins!`,win:`All files signed for Pongal!`},dhruv:{intro:`Pongal Vlog live now guys!`,win:`Like, share, Pongal special!`}}'
