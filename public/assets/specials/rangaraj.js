@@ -3,12 +3,13 @@ import { buildCharacterClip } from "./_animBuilder.js";
 import { spawnTransientFx } from "./_fxUtils.js";
 
 function makeClips(scene,id){
- const beat=(kind,duration,twist)=>buildCharacterClip(scene,{name:`south_${kind}_${id}`,fighterId:id,kind,duration,fxCleanupAt:[duration*.46,duration],returnToClean:true,frames:[
-  {time:.14,bones:{Hips:{rotation:[.05,.16,-.06]},Spine:{rotation:[-.12,-.18,.08]},Spine2:{rotation:[-.16,-.22,.1]},Neck:{rotation:[.08,.14,0]},RightArm:{rotation:[-.62,.16,-.34]},RightForeArm:{rotation:[0,-.58,0]},LeftArm:{rotation:[.44,-.18,.24]},LeftForeArm:{rotation:[0,.42,0]},RightUpLeg:{rotation:[-.16,0,-.04]}},hips:[-.02,.03,0]},
-  {time:duration*.46,bones:{Hips:{rotation:[.12,.38,twist]},Spine:{rotation:[-.26,.46,.14]},Spine2:{rotation:[-.34,.52,.14]},Neck:{rotation:[.12,-.22,.04]},RightArm:{rotation:[-1.32,.24,-.62]},RightForeArm:{rotation:[0,-1.08,0]},RightHand:{rotation:[0,0,-.32]},LeftArm:{rotation:[.68,-.32,.34]},LeftForeArm:{rotation:[0,.58,0]},RightUpLeg:{rotation:[-.56,0,-.12]},RightLeg:{rotation:[.86,0,0]},LeftUpLeg:{rotation:[.18,0,.06]}},hips:[.1,.08,0]},
-  {time:duration*.68,bones:{Hips:{rotation:[.04,.12,0]},Spine:{rotation:[-.1,.16,.04]},Spine2:{rotation:[-.14,.18,.04]},RightArm:{rotation:[-.48,.08,-.18]},RightForeArm:{rotation:[0,-.42,0]},LeftArm:{rotation:[.28,-.12,.14]},RightLeg:{rotation:[.28,0,0]}},hips:[.02,.02,0]}
+ const debate=(kind,duration,twist)=>buildCharacterClip(scene,{name:`south_${kind}_${id}`,fighterId:id,kind,duration,fxCleanupAt:[duration*.40,duration*.54,duration*.72,duration],returnToClean:true,frames:[
+  {time:.12,bones:{Hips:{rotation:[.06,.16,-.16]},Spine:{rotation:[-.12,-.20,.12]},Spine2:{rotation:[-.16,-.24,.14]},Neck:{rotation:[.08,.14,-.08]},LeftArm:{rotation:[.44,-.18,.28]},LeftForeArm:{rotation:[0,.52,0]},LeftHand:{rotation:[.08,.08,.24]}},hips:[-.03,.03,0]},
+  {time:.30,bones:{Hips:{rotation:[.12,.32,-.26]},Spine:{rotation:[-.24,-.36,.18]},Spine2:{rotation:[-.32,-.44,.20]},Neck:{rotation:[.12,-.20,-.10]},RightArm:{rotation:[-.82,.20,-.54]},RightForeArm:{rotation:[0,-.88,0]},RightHand:{rotation:[.10,.10,-.34]},LeftArm:{rotation:[.64,-.28,.38]},LeftForeArm:{rotation:[0,.68,0]}},hips:[.05,.06,0]},
+  {time:duration*.48,bones:{Hips:{rotation:[.16,.46,twist]},Spine:{rotation:[-.34,-.52,.24]},Spine2:{rotation:[-.44,-.60,.28]},Neck:{rotation:[.16,-.26,-.14]},RightArm:{rotation:[-1.38,.32,-.68]},RightForeArm:{rotation:[0,-1.22,0]},RightHand:{rotation:[.16,.14,-.42]},LeftArm:{rotation:[.78,-.38,.46]},LeftForeArm:{rotation:[0,.78,0]},RightUpLeg:{rotation:[-.58,0,-.12]},RightLeg:{rotation:[.88,0,0]}},hips:[.12,.10,0]},
+  {time:duration*.72,bones:{Hips:{rotation:[.06,.16,-.06]},Spine:{rotation:[-.12,-.16,.06]},RightArm:{rotation:[-.54,.08,-.20]},RightForeArm:{rotation:[0,-.44,0]},LeftArm:{rotation:[.30,-.12,.14]},RightLeg:{rotation:[.30,0,0]}},hips:[.02,.02,0]}
  ]});
- return [beat("special1",.82,-.12),beat("special2",1.02,.14),beat("super",1.15,.18)];
+ return [debate("special1",.82,-.14),debate("special2",1.02,.18),debate("super",1.15,.22)];
 }
 export function buildClips(scene){return makeClips(scene,"rangaraj");}
 export function fx(battle,attacker,target,moveId){

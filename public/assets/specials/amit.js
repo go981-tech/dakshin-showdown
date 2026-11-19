@@ -3,12 +3,13 @@ import { buildCharacterClip } from "./_animBuilder.js";
 import { spawnTransientFx } from "./_fxUtils.js";
 
 function makeClips(scene,id){
- const beat=(kind,duration,twist)=>buildCharacterClip(scene,{name:`south_${kind}_${id}`,fighterId:id,kind,duration,fxCleanupAt:[duration*.46,duration],returnToClean:true,frames:[
-  {time:.14,bones:{Hips:{rotation:[.06,-.14,-.06]},Spine:{rotation:[-.12,.18,-.08]},Spine2:{rotation:[-.16,.22,-.1]},Neck:{rotation:[.08,-.12,0]},RightArm:{rotation:[-.72,.14,-.38]},RightForeArm:{rotation:[0,-.68,0]},LeftArm:{rotation:[.42,-.18,.24]},LeftForeArm:{rotation:[0,.38,0]},RightUpLeg:{rotation:[-.16,0,-.04]}},hips:[-.03,.02,0]},
-  {time:duration*.46,bones:{Hips:{rotation:[.12,-.36,twist]},Spine:{rotation:[-.28,.44,-.14]},Spine2:{rotation:[-.34,.48,-.16]},Neck:{rotation:[.12,-.22,.04]},RightArm:{rotation:[-1.42,.26,-.68]},RightForeArm:{rotation:[0,-1.18,0]},RightHand:{rotation:[0,0,-.36]},LeftArm:{rotation:[.68,-.34,.34]},LeftForeArm:{rotation:[0,.58,0]},RightUpLeg:{rotation:[-.58,0,-.12]},RightLeg:{rotation:[.88,0,0]},LeftUpLeg:{rotation:[.16,0,.06]}},hips:[.1,.08,0]},
-  {time:duration*.68,bones:{Hips:{rotation:[.04,-.12,0]},Spine:{rotation:[-.1,.16,-.04]},Spine2:{rotation:[-.14,.18,-.04]},RightArm:{rotation:[-.52,.08,-.2]},RightForeArm:{rotation:[0,-.44,0]},LeftArm:{rotation:[.28,-.12,.14]},RightLeg:{rotation:[.28,0,0]}},hips:[.02,.02,0]}
+ const file=(kind,duration,twist)=>buildCharacterClip(scene,{name:`south_${kind}_${id}`,fighterId:id,kind,duration,fxCleanupAt:[duration*.40,duration*.54,duration*.72,duration],returnToClean:true,frames:[
+  {time:.12,bones:{Hips:{rotation:[.06,-.12,-.16]},Spine:{rotation:[-.12,.16,-.12]},Spine2:{rotation:[-.16,.20,-.14]},Neck:{rotation:[.08,-.12,.04]},LeftArm:{rotation:[.44,-.18,.28]},LeftForeArm:{rotation:[0,.52,0]},LeftHand:{rotation:[.08,.08,.22]}},hips:[-.03,.03,0]},
+  {time:.30,bones:{Hips:{rotation:[.12,-.28,-.26]},Spine:{rotation:[-.24,.32,-.18]},Spine2:{rotation:[-.32,.40,-.20]},Neck:{rotation:[.12,-.18,.06]},RightArm:{rotation:[-.82,.20,-.54]},RightForeArm:{rotation:[0,-.88,0]},RightHand:{rotation:[.10,.10,-.34]},LeftArm:{rotation:[.64,-.30,.38]},LeftForeArm:{rotation:[0,.68,0]}},hips:[.05,.06,0]},
+  {time:duration*.48,bones:{Hips:{rotation:[.16,-.42,twist]},Spine:{rotation:[-.34,.48,-.22]},Spine2:{rotation:[-.44,.56,-.26]},Neck:{rotation:[.16,-.24,.08]},RightArm:{rotation:[-1.38,.30,-.68]},RightForeArm:{rotation:[0,-1.24,0]},RightHand:{rotation:[.16,.14,-.42]},LeftArm:{rotation:[.78,-.38,.46]},LeftForeArm:{rotation:[0,.78,0]},RightUpLeg:{rotation:[-.58,0,-.12]},RightLeg:{rotation:[.88,0,0]}},hips:[.12,.10,0]},
+  {time:duration*.72,bones:{Hips:{rotation:[.06,-.14,-.06]},Spine:{rotation:[-.12,.16,-.06]},RightArm:{rotation:[-.54,.08,-.20]},RightForeArm:{rotation:[0,-.44,0]},LeftArm:{rotation:[.30,-.12,.14]},RightLeg:{rotation:[.30,0,0]}},hips:[.02,.02,0]}
  ]});
- return [beat("special1",.84,-.12),beat("special2",1.02,.14),beat("super",1.15,.18)];
+ return [file("special1",.84,-.14),file("special2",1.02,.18),file("super",1.15,.22)];
 }
 export function buildClips(scene){return makeClips(scene,"amit");}
 export function fx(battle,attacker,target,moveId){

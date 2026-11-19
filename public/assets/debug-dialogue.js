@@ -131,7 +131,7 @@ function recordDropped(payload) {
   activeSync = {
     lineId: payload.lineId,
     priority: payload.priority,
-    approved: payload.approved !== false,
+    approved: payload.approved === true,
     matchScore: 0,
     speakerScore: 0,
     subtitleStartMs: performance.now(),
@@ -160,10 +160,11 @@ function recordDialogue(payload) {
   const initialDurationMs = Number(payload.durationMs) > 0
     ? payload.durationMs
     : SUBTITLE_DURATION_MS;
+  const approved = entry.approved === true;
   activeSync = {
     lineId: payload.lineId,
     priority: payload.priority,
-    approved: entry.approved !== false,
+    approved,
     matchScore,
     speakerScore,
     subtitleStartMs: now,
@@ -175,9 +176,11 @@ function recordDialogue(payload) {
     dropped: false,
     audioUrl: entry.audio || null
   };
-  if (entry.approved === false) {
+  if (payload.requireApproved === true && !approved) {
     activeSync.dropped = true;
     addLog("warning", `Line dropped or unapproved: ${payload.lineId}`);
+  } else if (!approved) {
+    addLog("warning", `Playing fallback voice: ${payload.lineId}`);
   }
 
   if (entry.audio) {
