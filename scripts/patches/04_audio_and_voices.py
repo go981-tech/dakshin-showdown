@@ -30,15 +30,17 @@ def apply(ctx):
         'function It(e,t,n){return n}',
         'Disable It() festival override so introLine/winLine match real audio',
     )
-    ctx.replace_exact(
-        'this.cue(`a`,.5,()=>this.speech(0,this.diwali?It(n.char.id,`intro`,n.char.introLine):n.char.introLine)),this.cue(`b`,this.introLength/2+.1,()=>this.speech(1,this.diwali?It(r.char.id,`intro`,r.char.introLine):r.char.introLine))',
-        'this.cue(`a`,.5,()=>sayLine(this,0,`intro`,{priority:2})),this.cue(`b`,this.introLength/2+.1,()=>sayLine(this,1,`intro`,{priority:2}))',
-        'Route round intros through sayLine',
+    ctx.replace_span(
+        'runPhase(){let{hud:e,audio:t}=this.ctx,[n,r]=this.fighters;switch(this.phase){case`intro`:',
+        'case`roundCall`:',
+        'runPhase(){let{hud:e,audio:t}=this.ctx,[n,r]=this.fighters;switch(this.phase){case`intro`:{if(!this.isGuest){let i=window.__local2P&&!this.net?this.ctx.input.pollP1():this.ctx.input.poll(),a=window.__local2P&&!this.net?this.ctx.input.pollP2():null;if(i.punch||i.kick||i.super||a?.punch||a?.kick||a?.super){t.stopClip(0),n.forceState(`idle`),r.forceState(`idle`),this.setPhase(`roundCall`);break}}if(this.bossIntro){this.stepBossIntro(),this.phaseTime>this.introLength&&(n.forceState(`idle`),r.forceState(`idle`),this.setPhase(`roundCall`));break}this.cue(`a`,.35,()=>{this._introStage=1,sayLine(this,0,`intro`,{priority:2})}),this._introStage===1&&this.phaseTime>.8&&(!t.clipActive||this.phaseTime>3.6)&&(sayLine(this,1,`intro`,{priority:2}),this._introStage=2,this._p2IntroAt=this.phaseTime),this.cue(`paparazzi`,.3,()=>{(n.char.danceIntro||r.char.danceIntro)&&(this.ctx.arena.paparazzi(10),t.cameraClicks(8))}),!this.isGuest&&this._introStage===2&&this.phaseTime>this._p2IntroAt+.4&&(!t.clipActive||this.phaseTime>7.5)&&(n.forceState(`idle`),r.forceState(`idle`),this.setPhase(`roundCall`));break}case`roundCall`:',
+        'Sequence P1 and P2 round intros with skippable clips',
+        include_end=True,
     )
     ctx.replace_exact(
-        '!this.isGuest&&this.phaseTime>this.introLength&&(n.forceState(`idle`),r.forceState(`idle`),this.setPhase(`roundCall`))',
-        '!this.isGuest&&this.phaseTime>this.introLength&&(!t.clipActive||this.phaseTime>4.5)&&(n.forceState(`idle`),r.forceState(`idle`),this.setPhase(`roundCall`))',
-        'Intro waits for no clip active up to 4.5s',
+        'e?(t.forceState(`intro`),n.forceState(`intro`),this.setPhase(`intro`),this.bossIntro&&this.beginBossIntro()):this.setPhase(`roundCall`)',
+        'e?(t.forceState(`intro`),n.forceState(`intro`),this._introStage=0,this._p2IntroAt=0,this.setPhase(`intro`),this.bossIntro&&this.beginBossIntro()):this.setPhase(`roundCall`)',
+        'Reset sequential intro pacing state',
     )
     ctx.replace_exact(
         'this.ctx.audio.announce(r.perfect?`perfect`:`wins_${e.char.id}`),this.speech(r.outcome,this.diwali?It(e.char.id,`win`,e.char.winLine):e.char.winLine)',
@@ -67,12 +69,12 @@ def apply(ctx):
     )
     ctx.replace_exact(
         'this.superCaster=e,this.superMove=kd',
-        'this.superCaster=e,window.__activeBattle=this,sayLine(this,e,`super`,{priority:4}),this.superMove=kd',
-        'Route super start through sayLine',
+        'this.superCaster=e,window.__activeBattle=this,this.superMove=kd',
+        'Track active battle without firing super speech at t0',
     )
     ctx.replace_exact(
-        'speech:(t,r)=>this.speech(t===`caster`?e:n.side,r)',
-        'battle:this,speech:(t,r)=>t===`target`||t===`defender`||t===`opp`?this.speech(n.side,r,2200):sayLine(this,e,`super`,{priority:4})',
+        'clipTime:()=>i.clipTime(),popup:(e,t,n)=>{let i=this.ctx.toScreen(t);r.popup(e,i.x,i.y,n)},speech:(t,r)=>this.speech(t===`caster`?e:n.side,r)',
+        'clipTime:()=>i.clipTime(),popup:(e,t,n)=>{let i=this.ctx.toScreen(t);r.popup(e,i.x,i.y,n)},battle:this,speech:(t,r)=>t===`target`||t===`defender`||t===`opp`?this.speech(n.side,r,2200):sayLine(this,e,`super`,{priority:4})',
         'Route super speech beats through sayLine',
     )
     ctx.replace_exact(

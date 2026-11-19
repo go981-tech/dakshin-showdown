@@ -8,13 +8,25 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import unicodedata
 from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple
 
 import imageio_ffmpeg
+
+try:
+    from anyascii import anyascii
+except ImportError:
+    anyascii = None
+
+try:
+    from rapidfuzz.fuzz import partial_ratio
+except ImportError:
+    partial_ratio = None
 
 try:
     import yt_dlp
@@ -37,13 +49,13 @@ LIMITS = {
 # no montage, compilation, dubbed, or mixed-cast source is accepted.
 ICONIC_DIALOGUE_TARGETS = {
     "modi": {
-        "intro": ("Tamilnattu arasin mudhalamaichararga?", ["Stalin Tamil Nadu chief minister speech", "Stalin Tamil political speech"]),
-        "special1": ("Tamilnattu arasin mudhalamaichararga?", ["Stalin Tamil Nadu Chief Minister original speech"]),
-        "special2": ("Nermaiyaga seyven endrum urudhi mozhigiren", ["Stalin Tamil Nadu oath promise speech"]),
-        "super": ("Muthuvel Karunanidhi Stalin Vidiyal Aatchi", ["Stalin Tamil Nadu Vidiyal Aatchi speech"]),
-        "win": ("Nermaiyaga seyven endrum urudhi mozhigiren", ["Stalin speech Tamil urudhi mozhigiren"]),
-        "bark1": ("Tamilnattu arasin mudhalamaichararga?", ["Stalin Tamil Nadu address"]),
-        "bark2": ("Nermaiyaga seyven endrum urudhi mozhigiren", ["Stalin Tamil oath speech"]),
+        "intro": ("Ungalil oruvan", ["Stalin Ungalil oruvan speech", "M K Stalin Ungalil oruvan"]),
+        "special1": ("Vidiyal aatchi", ["Stalin Vidiyal aatchi speech", "DMK Vidiyal aatchi Stalin"]),
+        "special2": ("Naadu namadhe", ["Stalin Naadu namadhe speech", "M K Stalin Naadu namadhe"]),
+        "super": ("Vidiyal aatchi", ["Stalin Vidiyal aatchi original speech"]),
+        "win": ("Naadu namadhe", ["Stalin Naadu namadhe original speech"]),
+        "bark1": ("Vanakkam", ["Stalin Vanakkam public speech"]),
+        "bark2": ("Ungalil oruvan", ["Stalin Ungalil oruvan original address"]),
     },
     "rahul": {
         "intro": ("What bro? It's very wrong bro!", ["Vijay what bro Tamil interview", "Vijay Leo brother interview"]),
@@ -65,7 +77,7 @@ ICONIC_DIALOGUE_TARGETS = {
         "bark2": ("Naan irukkindra varai", ["Jayalalithaa Tamil crowd speech"]),
     },
     "trump": {
-        "intro": ("Pushpa Pushparaj... Thaggedhe Le!", ["Allu Arjun Pushpa Thaggedhe Le Tamil dubbed"]),
+        "intro": ("Pushpa Pushparaj... Thaggedhe Le!", ["Allu Arjun Pushpa Thaggedhe Le dialogue"]),
         "special1": ("Pushpa ante flower-a? Fireuu!", ["Allu Arjun Pushpa flower fire dialogue Tamil"]),
         "special2": ("Pushpa ante flower-a? Fireuu!", ["Allu Arjun Pushpa interval dialogue"]),
         "super": ("Pushpa ante flower anukunnava? FIRE!", ["Allu Arjun Pushpa pre interval fire dialogue"]),
@@ -74,22 +86,22 @@ ICONIC_DIALOGUE_TARGETS = {
         "bark2": ("Pushpa ante flower-a?", ["Allu Arjun Pushpa flower dialogue"]),
     },
     "yogi": {
-        "intro": ("Mukhyamantri kaserayil aakam", ["Pinarayi Vijayan Malayalam speech"]),
+        "intro": ("LDF varum ellam sheri aakum", ["Pinarayi Vijayan LDF varum ellam sheri aakum speech"]),
         "special1": ("Kadakku Purathu", ["Pinarayi Vijayan Kadakku Purathu speech"]),
-        "special2": ("Entho undakki kalayam ennanaanu vicharikunnathu", ["Pinarayi Vijayan Malayalam public speech"]),
+        "special2": ("LDF varum ellam sheri aakum", ["Pinarayi Vijayan LDF ellam sheri aakum Malayalam"]),
         "super": ("Kadakku Purathu!", ["Pinarayi Vijayan famous Kadakku Purathu address"]),
-        "win": ("Entho undakki kalayam ennanaanu vicharikunnathu", ["Pinarayi Vijayan Malayalam statement"]),
-        "bark1": ("Mukhyamantri kaserayil aakam", ["Pinarayi Vijayan Malayalam address"]),
+        "win": ("LDF varum ellam sheri aakum", ["Pinarayi Vijayan LDF varum Malayalam statement"]),
+        "bark1": ("Kadakku Purathu", ["Pinarayi Vijayan Kadakku Purathu address"]),
         "bark2": ("Kadakku Purathu", ["Pinarayi Vijayan Kadakku Purathu"]),
     },
     "nitin": {
-        "intro": ("One thing I'd like to tell you - my birthday", ["DK Shivakumar birthday speech English"]),
-        "special1": ("Kanakapura Bande", ["DK Shivakumar Kanakapura Bande speech"]),
-        "special2": ("By profession I'm a businessman", ["DK Shivakumar businessman interview"]),
+        "intro": ("Naane Raja naane Mantri", ["DK Shivakumar Naane Raja naane Mantri speech"]),
+        "special1": ("By profession I am a businessman", ["DK Shivakumar businessman interview"]),
+        "special2": ("Kanakapura Bande", ["DK Shivakumar Kanakapura Bande speech"]),
         "super": ("Kanakapura Bande!", ["DK Shivakumar Kanakapura Bande original"]),
-        "win": ("By profession I'm a businessman", ["DK Shivakumar press meet businessman"]),
-        "bark1": ("One thing I'd like to tell you", ["DK Shivakumar birthday press statement"]),
-        "bark2": ("Operation Success! 5 Guarantees", ["DK Shivakumar guarantee speech"]),
+        "win": ("By profession I am a businessman", ["DK Shivakumar press meet businessman"]),
+        "bark1": ("Naane Raja naane Mantri", ["DK Shivakumar Naane Raja original speech"]),
+        "bark2": ("Kanakapura Bande", ["DK Shivakumar Kanakapura Bande rally"]),
     },
     "ravi": {
         "intro": ("Naaku konchem thikka undhi, kaani daniko lekka undhi", ["Pawan Kalyan Telugu thikka undhi speech"]),
@@ -164,7 +176,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--whisper-model", default="small", help="faster-whisper model name")
     parser.add_argument("--source-mode", choices=("local", "fetch"), default="local", help="Candidate discovery mode")
     parser.add_argument("--dry-run", action="store_true", help="Inspect candidates without transcribing or writing")
-    parser.add_argument("--fetch-limit", type=int, default=5, help="Maximum fetched candidates per fighter")
+    parser.add_argument("--fetch-limit", type=int, default=5, help="Maximum fetched candidates per line")
     return parser.parse_args()
 
 
@@ -172,14 +184,36 @@ def normalized_words(text: str) -> List[str]:
     return re.findall(r"[^\W\d_]+(?:['-][^\W\d_]+)*", text.lower(), flags=re.UNICODE)
 
 
+def normalized_match_variants(text: str) -> List[str]:
+    native = " ".join(normalized_words(text))
+    if anyascii is not None:
+        latin_source = anyascii(text)
+    else:
+        latin_source = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+    latin = " ".join(normalized_words(latin_source))
+    variants = []
+    for value in (native, latin):
+        for normalized in (value, re.sub(r"([aeiou])\1+", r"\1", value)):
+            if normalized and normalized not in variants:
+                variants.append(normalized)
+    return variants
+
+
 def match_score(expected: str, actual: str) -> float:
-    expected_words = normalized_words(expected)
-    actual_words = normalized_words(actual)
-    if not expected_words:
-        return 1.0 if not actual_words else 0.0
-    if not actual_words:
+    expected_variants = normalized_match_variants(expected)
+    actual_variants = normalized_match_variants(actual)
+    if not expected_variants:
+        return 1.0 if not actual_variants else 0.0
+    if not actual_variants:
         return 0.0
-    return round(SequenceMatcher(None, " ".join(expected_words), " ".join(actual_words)).ratio(), 3)
+    scores = []
+    for expected_variant in expected_variants:
+        for actual_variant in actual_variants:
+            if partial_ratio is not None:
+                scores.append(partial_ratio(expected_variant, actual_variant) / 100.0)
+            else:
+                scores.append(SequenceMatcher(None, expected_variant, actual_variant).ratio())
+    return round(max(scores), 3)
 
 
 def audio_path(source: str) -> Optional[Path]:
@@ -201,20 +235,39 @@ def duration_limit(line_id: str) -> Optional[float]:
 
 
 def ffprobe_duration(path: Path) -> Optional[float]:
-    ffprobe = str(Path(imageio_ffmpeg.get_ffmpeg_exe()).with_name("ffprobe.exe"))
-    if not Path(ffprobe).is_file():
-        ffprobe = "ffprobe"
+    ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+    ffprobe_paths = [
+        Path(ffmpeg).with_name("ffprobe.exe"),
+        Path(ffmpeg).with_name("ffprobe"),
+        shutil.which("ffprobe"),
+    ]
+    probes = [str(value) for value in ffprobe_paths if value and (Path(value).is_file() or str(value) == shutil.which("ffprobe"))]
+    result = None
+    for ffprobe in dict.fromkeys(probes):
+        try:
+            result = subprocess.run(
+                [ffprobe, "-v", "error", "-show_entries", "format=duration", "-of", "json", str(path)],
+                capture_output=True,
+                text=True,
+                timeout=15,
+            )
+            if result.returncode == 0:
+                return float(json.loads(result.stdout)["format"]["duration"])
+        except (OSError, subprocess.SubprocessError, ValueError, KeyError, json.JSONDecodeError):
+            continue
     try:
         result = subprocess.run(
-            [ffprobe, "-v", "error", "-show_entries", "format=duration", "-of", "json", str(path)],
+            [ffmpeg, "-hide_banner", "-i", str(path)],
             capture_output=True,
             text=True,
             timeout=15,
         )
-        if result.returncode == 0:
-            return float(json.loads(result.stdout)["format"]["duration"])
-    except Exception:
-        pass
+        match = re.search(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)", result.stderr)
+        if match:
+            hours, minutes, seconds = match.groups()
+            return int(hours) * 3600 + int(minutes) * 60 + float(seconds)
+    except (OSError, subprocess.SubprocessError):
+        return None
     return None
 
 
@@ -305,12 +358,31 @@ def cut_exact(source: Path, destination: Path, start: float, end: float, maximum
         return False
 
 
+_voice_encoder = None
+_voice_encoder_loaded = False
+
+
+def get_voice_encoder() -> Optional[object]:
+    global _voice_encoder, _voice_encoder_loaded
+    if not _voice_encoder_loaded:
+        _voice_encoder_loaded = True
+        try:
+            from resemblyzer import VoiceEncoder
+            _voice_encoder = VoiceEncoder("cpu")
+        except Exception:
+            _voice_encoder = None
+    return _voice_encoder
+
+
 def get_reference_embedding(reference: Path) -> Optional[object]:
     try:
         import numpy as np
-        from resemblyzer import VoiceEncoder, preprocess_wav
+        from resemblyzer import preprocess_wav
+        encoder = get_voice_encoder()
+        if encoder is None:
+            return None
         wav = preprocess_wav(str(reference))
-        embedding = VoiceEncoder().embed_utterance(wav)
+        embedding = encoder.embed_utterance(wav)
         return np.asarray(embedding)
     except Exception:
         return None
@@ -321,9 +393,12 @@ def speaker_score(reference_embedding: Optional[object], candidate: Path) -> flo
         return 0.0
     try:
         import numpy as np
-        from resemblyzer import VoiceEncoder, preprocess_wav
+        from resemblyzer import preprocess_wav
+        encoder = get_voice_encoder()
+        if encoder is None:
+            return 0.0
         wav = preprocess_wav(str(candidate))
-        embedding = np.asarray(VoiceEncoder().embed_utterance(wav))
+        embedding = np.asarray(encoder.embed_utterance(wav))
         score = float(np.dot(reference_embedding, embedding) /
                       (np.linalg.norm(reference_embedding) * np.linalg.norm(embedding)))
         return round(max(0.0, min(1.0, score)), 3)
@@ -362,7 +437,6 @@ def fetch_candidates(fighter: str, cache_dir: Path, queries: List[str], limit: i
     candidates_dir = cache_dir / "candidates" / fighter
     candidates_dir.mkdir(parents=True, exist_ok=True)
     candidates = []
-    query = " ".join(dict.fromkeys(queries[:3]))
     ydl_opts = {
         "quiet": True,
         "no_warnings": True,
@@ -371,26 +445,31 @@ def fetch_candidates(fighter: str, cache_dir: Path, queries: List[str], limit: i
         "outtmpl": str(candidates_dir / "%(id)s.%(ext)s"),
         "noplaylist": True,
     }
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            results = ydl.extract_info(f"ytsearch{limit}:{query}", download=False)
-            entries = results.get("entries", []) if isinstance(results, dict) else []
-            for entry in entries:
-                if not isinstance(entry, dict) or not entry.get("webpage_url"):
-                    continue
-                info = ydl.extract_info(entry["webpage_url"], download=True)
-                requested = info.get("requested_downloads", []) if isinstance(info, dict) else []
-                candidate_paths = [
-                    Path(download["filepath"]) for download in requested
-                    if isinstance(download, dict) and download.get("filepath")
-                ]
-                if not candidate_paths and isinstance(info, dict) and info.get("filepath"):
-                    candidate_paths = [Path(info["filepath"])]
-                for path in candidate_paths:
-                    if path.is_file() and path not in candidates:
-                        candidates.append(path)
-    except Exception as exc:
-        print(f"fetch candidate discovery failed for {fighter}: {exc}", file=sys.stderr)
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        for query in dict.fromkeys(queries):
+            if len(candidates) >= limit:
+                break
+            try:
+                results = ydl.extract_info(f"ytsearch3:{query}", download=False)
+                entries = results.get("entries", []) if isinstance(results, dict) else []
+                for entry in entries:
+                    if len(candidates) >= limit:
+                        break
+                    if not isinstance(entry, dict) or not entry.get("webpage_url"):
+                        continue
+                    info = ydl.extract_info(entry["webpage_url"], download=True)
+                    requested = info.get("requested_downloads", []) if isinstance(info, dict) else []
+                    candidate_paths = [
+                        Path(download["filepath"]) for download in requested
+                        if isinstance(download, dict) and download.get("filepath")
+                    ]
+                    if not candidate_paths and isinstance(info, dict) and info.get("filepath"):
+                        candidate_paths = [Path(info["filepath"])]
+                    for path in candidate_paths:
+                        if path.is_file() and path not in candidates:
+                            candidates.append(path)
+            except Exception as exc:
+                print(f"fetch candidate discovery failed for {fighter} / {query}: {exc}", file=sys.stderr)
     return candidates[:limit]
 
 
@@ -421,22 +500,13 @@ def process_voice_lines(
     rows = []
 
     for fighter, lines in updated.items():
+        if fighter == "_meta":
+            continue
         if selected and fighter not in selected:
             continue
         targets = ICONIC_DIALOGUE_TARGETS.get(fighter, {})
         reference = find_reference(fighter, data)
         reference_embedding = None if dry_run or reference is None else get_reference_embedding(reference)
-        queries = []
-        for target in targets.values():
-            if isinstance(target, tuple):
-                queries.extend(target[1])
-
-        candidates = []
-        if dry_run or source_mode == "local":
-            candidates = local_candidates(fighter, cache_dir)
-        if source_mode == "fetch":
-            candidates = fetch_candidates(fighter, cache_dir, queries, fetch_limit)
-
         for line_id, entry in lines.items():
             if not isinstance(entry, dict):
                 continue
@@ -445,7 +515,7 @@ def process_voice_lines(
             if line_id in ("bark1", "bark2", "special1", "special2") and not target_phrase:
                 continue
             entry["iconicTarget"] = target_phrase
-            entry["searchQueries"] = target_data[1] if isinstance(target_data, tuple) else []
+            entry["searchQueries"] = list(target_data[1]) if isinstance(target_data, tuple) else []
             entry["sourceMode"] = source_mode
             entry.setdefault("durationMs", duration_limit(line_id) * 1000 if duration_limit(line_id) else 3000)
             entry["approved"] = False
@@ -455,6 +525,15 @@ def process_voice_lines(
 
             fallback_source = entry.get("audio", "")
             fallback_path = audio_path(fallback_source)
+            if dry_run or source_mode == "local":
+                candidates = local_candidates(fighter, cache_dir)
+            else:
+                candidates = fetch_candidates(
+                    fighter,
+                    cache_dir,
+                    entry["searchQueries"],
+                    fetch_limit,
+                )
             if dry_run:
                 rows.append({
                     "fighter": fighter,
@@ -554,7 +633,6 @@ def process_voice_lines(
                 exact_duration = ffprobe_duration(exact)
                 entry["durationMs"] = round((exact_duration or duration_limit(line_id) or 3.0) * 1000)
                 if str(exact).replace("\\", "/") != str(destination).replace("\\", "/"):
-                    import shutil
                     shutil.copy2(exact, destination)
                 entry["audio"] = f"/assets/voice/{fighter}/{line_id}.mp3"
                 entry["source"] = str(exact)
@@ -609,7 +687,7 @@ def main() -> int:
     if not VOICE_JSON.is_file():
         print(f"Missing voice-lines file: {VOICE_JSON}", file=sys.stderr)
         return 1
-    data = json.loads(VOICE_JSON.read_text(encoding="utf-8"))
+    data = json.loads(VOICE_JSON.read_text(encoding="utf-8-sig"))
     updated, rows = process_voice_lines(
         data,
         fighter_ids,

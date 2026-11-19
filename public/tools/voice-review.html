@@ -52,6 +52,7 @@
       const filter = $("filter").value;
       flat = [];
       for (const [fid, lines] of Object.entries(data)) {
+        if (fid === "_meta") continue;
         for (const [lid, line] of Object.entries(lines)) {
           let include = filter === "all";
           if (filter === "pending") include = line.approved === false;
@@ -67,9 +68,12 @@
 
     function progress() {
       let total = 0, approved = 0;
-      for (const lines of Object.values(data)) for (const line of Object.values(lines)) {
+      for (const [fid, lines] of Object.entries(data)) {
+        if (fid === "_meta") continue;
+        for (const line of Object.values(lines)) {
         total++;
         if (line.approved) approved++;
+        }
       }
       $("progress").value = total ? approved / total : 0;
       $("progress").title = `${approved}/${total} approved`;
@@ -78,6 +82,7 @@
     function renderFighters() {
       $("fighters").innerHTML = "";
       for (const fid of Object.keys(data)) {
+        if (fid === "_meta") continue;
         const b = document.createElement("button");
         b.className = "fighter" + (fid === fighter ? " active" : "");
         b.textContent = fid;

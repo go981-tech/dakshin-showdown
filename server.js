@@ -106,6 +106,11 @@ function readRawJsonBody(req) {
 function validateVoiceLines(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   for (const [fighter, lines] of Object.entries(value)) {
+    if (fighter === "_meta") {
+      if (!lines || typeof lines !== "object" || Array.isArray(lines)) return false;
+      if (typeof lines.requireApproved !== "boolean") return false;
+      continue;
+    }
     if (!fighter || !lines || typeof lines !== "object" || Array.isArray(lines)) return false;
     for (const [lineId, line] of Object.entries(lines)) {
       if (!lineId || !line || typeof line !== "object" || Array.isArray(line)) return false;
@@ -186,7 +191,8 @@ const server = http.createServer(async (req, res) => {
     const file = path.join(PUBLIC_DIR, "assets", "voice-lines.json");
     if (req.method === "GET") {
       try {
-        return sendJson(res, 200, JSON.parse(fs.readFileSync(file, "utf8")));
+        const text = fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "");
+        return sendJson(res, 200, JSON.parse(text));
       } catch {
         return sendJson(res, 500, { error: "Could not read voice lines" });
       }

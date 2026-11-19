@@ -1432,13 +1432,14 @@ function loadVoiceLines() {
   return _voiceLinesPromise;
 }
 
-function fallbackApproved(entry) {
-  return !!(entry && entry.text && entry.audio && entry.approved !== false);
+function fallbackApproved(entry, requireApproved) {
+  return !!(entry && entry.text && entry.audio && (!requireApproved || entry.approved === true));
 }
 
-export async function sayLine(battle, side, lineId, { priority = 1, allowUnapproved = false } = {}) {
+export async function sayLine(battle, side, lineId, { priority = 1 } = {}) {
   if (!battle) return false;
   const lines = await loadVoiceLines();
+  const requireApproved = lines?._meta?.requireApproved === true;
   const fighter = battle.fighters?.[resolveDialogueSide(battle, side)];
   const fighterId = fighter?.char?.id;
   const fallbackIds = {
@@ -1452,10 +1453,10 @@ export async function sayLine(battle, side, lineId, { priority = 1, allowUnappro
   };
   let entry = lines?.[fighterId]?.[lineId];
   let resolvedLineId = lineId;
-  if (!fallbackApproved(entry)) {
+  if (!fallbackApproved(entry, requireApproved)) {
     for (const fallbackId of fallbackIds[lineId] || []) {
       const fallback = lines?.[fighterId]?.[fallbackId];
-      if (fallbackApproved(fallback)) {
+      if (fallbackApproved(fallback, requireApproved)) {
         entry = fallback;
         resolvedLineId = fallbackId;
         break;
@@ -1466,7 +1467,7 @@ export async function sayLine(battle, side, lineId, { priority = 1, allowUnappro
     window.__southDebug?.recordDropped?.({ lineId, priority, approved: false, reason: "Missing line" });
     return false;
   }
-  if (entry.approved === false && !allowUnapproved) {
+  if (requireApproved && entry.approved !== true) {
     window.__southDebug?.recordDropped?.({ lineId, priority, approved: false, reason: "Unapproved line" });
     return false;
   }
@@ -1480,29 +1481,29 @@ export async function sayLine(battle, side, lineId, { priority = 1, allowUnappro
   const clipActive = !!(typeof audio?.clipActive === "function" ? audio.clipActive() : audio?.clipActive);
   const active = _activeVoiceLine;
   if (priority === 1 && active && active.priority === 1 && active.quietUntil > now) {
-    window.__southDebug?.recordDropped?.({ lineId, priority, approved: entry.approved !== false, reason: "Priority-1 quiet gap" });
+    window.__southDebug?.recordDropped?.({ lineId, priority, approved: entry.approved === true, reason: "Priority-1 quiet gap" });
     return false;
   }
   if (active && active.expiresAt > now && active.priority > priority) {
-    window.__southDebug?.recordDropped?.({ lineId, priority, approved: entry.approved !== false, reason: "Priority blocked" });
+    window.__southDebug?.recordDropped?.({ lineId, priority, approved: entry.approved === true, reason: "Priority blocked" });
     return false;
   }
   if (active && active.expiresAt > now && active.priority === priority && active.lineId === lineId) {
-    window.__southDebug?.recordDropped?.({ lineId, priority, approved: entry.approved !== false, reason: "Duplicate line" });
+    window.__southDebug?.recordDropped?.({ lineId, priority, approved: entry.approved === true, reason: "Duplicate line" });
     return false;
   }
   if (clipActive && !active && priority < 4) {
-    window.__southDebug?.recordDropped?.({ lineId, priority, approved: entry.approved !== false, reason: "Clip already active" });
+    window.__southDebug?.recordDropped?.({ lineId, priority, approved: entry.approved === true, reason: "Clip already active" });
     return false;
   }
   if (clipActive && active && active.expiresAt > now && active.priority >= priority) {
-    window.__southDebug?.recordDropped?.({ lineId, priority, approved: entry.approved !== false, reason: "Clip already active" });
+    window.__southDebug?.recordDropped?.({ lineId, priority, approved: entry.approved === true, reason: "Clip already active" });
     return false;
   }
 
   if (!entry.audio || !audio || audio.muted || typeof audio.playClip !== "function") {
     const reason = audio?.muted ? "Battle audio muted" : "Dialogue audio unavailable";
-    window.__southDebug?.recordDropped?.({ lineId: resolvedLineId, priority, approved: entry.approved !== false, reason });
+    window.__southDebug?.recordDropped?.({ lineId: resolvedLineId, priority, approved: entry.approved === true, reason });
     window.__southDebug?.addLog?.("error", `Audio failed: ${entry.audio || fighterId || "unknown"}`, reason);
     return false;
   }
@@ -1510,7 +1511,7 @@ export async function sayLine(battle, side, lineId, { priority = 1, allowUnappro
     await Promise.resolve(audio.playClip(entry.audio, 0.95));
   } catch (error) {
     console.error("Dialogue audio failed:", error);
-    window.__southDebug?.recordDropped?.({ lineId: resolvedLineId, priority, approved: entry.approved !== false, reason: "Audio playback failed" });
+    window.__southDebug?.recordDropped?.({ lineId: resolvedLineId, priority, approved: entry.approved === true, reason: "Audio playback failed" });
     window.__southDebug?.addLog?.("error", `Audio failed: ${entry.audio}`, error.message);
     return false;
   }
@@ -1527,7 +1528,7 @@ export async function sayLine(battle, side, lineId, { priority = 1, allowUnappro
     battle.speech(numericSide, entry.text, durationMs || 3000);
   } catch (error) {
     console.error("Dialogue subtitle failed:", error);
-    window.__southDebug?.recordDropped?.({ lineId: resolvedLineId, priority, approved: entry.approved !== false, reason: "Subtitle failed" });
+    window.__southDebug?.recordDropped?.({ lineId: resolvedLineId, priority, approved: entry.approved === true, reason: "Subtitle failed" });
     return false;
   }
   window.__southDebug?.recordDialogue?.({
@@ -1537,7 +1538,8 @@ export async function sayLine(battle, side, lineId, { priority = 1, allowUnappro
     expectedFighterId: fighterId,
     text: entry.text,
     entry,
-    durationMs
+    durationMs,
+    requireApproved
   });
   return true;
 }
